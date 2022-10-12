@@ -43,6 +43,11 @@ class Event():
         :type: typing.List[str]
         """
     @property
+    def rate(self) -> Rate:
+        """
+        :type: Rate
+        """
+    @property
     def species_dict(self) -> dict:
         """
         :type: dict
@@ -55,6 +60,10 @@ class MJP():
     @typing.overload
     def add_event(self, name: str, input_species: typing.List[str], output_species: typing.List[str], rate: float, hazard_callable: tuple, change_vec: typing.List[int]) -> None: ...
     @typing.overload
+    def add_rate(self, name: str, value: float) -> None: ...
+    @typing.overload
+    def add_rate(self, rate: Rate) -> None: ...
+    @typing.overload
     def add_species(self, name: str, lower: int = 0, upper: int = 1, default_value: int = 0) -> None: ...
     @typing.overload
     def add_species(self, species: Species) -> None: ...
@@ -66,6 +75,7 @@ class MJP():
     def hazard(self, state: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
     def ind2state(self, ind: int) -> numpy.ndarray[numpy.float64]: ...
     def parse_clusters(self, arg0: typing.List[typing.List[str]]) -> typing.List[typing.List[int]]: ...
+    def rate_index(self, rate: str) -> int: ...
     @typing.overload
     def species_index(self, species: str) -> int: ...
     @typing.overload
@@ -129,6 +139,11 @@ class MJP():
     def output_species(self) -> typing.List[typing.List[int]]:
         """
         :type: typing.List[typing.List[int]]
+        """
+    @property
+    def rate_list(self) -> typing.List[str]:
+        """
+        :type: typing.List[str]
         """
     @property
     def species_dict(self) -> dict:

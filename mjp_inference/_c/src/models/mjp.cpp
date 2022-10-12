@@ -38,11 +38,19 @@ void MJP::build() {
         hazard_funs.push_back(event_map[i].get_hazard_fun());
         // change vecs
         change_vectors.push_back(event_map[i].get_change_vec());
-        // rates
-        const std::string& rate_name = event_map[i].get_rate().get_name();
-        if (std::find(rate_list.begin(), rate_list.end(), rate_name) == rate_list.end()) {
-            rate_list.push_back(rate_name);
+    }
+    // extract rates if not provided
+    if( rate_map.size() == 0 ) {
+        for (int i = 0; i < num_events; i++) {
+            const std::string& rate_name = event_map[i].get_rate().get_name();
+            if (std::find(rate_list.begin(), rate_list.end(), rate_name) == rate_list.end()) {
+                rate_list.push_back(rate_name);
+            }
         }
+    }
+    // make rate map
+    for (int i = 0; i < num_events; i++) {
+        const std::string& rate_name = event_map[i].get_rate().get_name();
         unsigned ind = std::find(rate_list.begin(), rate_list.end(), rate_name) - rate_list.begin();
         event_to_rate_map.push_back(ind);
     }
@@ -94,6 +102,16 @@ std::vector<std::vector<unsigned>> MJP::parse_clusters(std::vector<std::vector<s
         converted_clusters[i] = species_index(clusters[i]);
     }
     return(converted_clusters);
+}
+
+unsigned MJP::rate_index(const std::string& rate) {
+    auto it = std::find(rate_list.begin(), rate_list.end(), rate);
+    unsigned index = it - rate_list.begin();
+    if (index == rate_list.size()) {
+        std::string msg = "Rate \"" + rate + "\" not part of model \"" + name + "\"";
+        throw std::invalid_argument(msg);
+    }
+    return(index);
 }
 
 // main functions

@@ -63,6 +63,11 @@ void init_models(pybind11::module_ &m){
             pybind11::arg("lower") = 0,
             pybind11::arg("upper") = 1,
             pybind11::arg("default_value") = 0)
+        .def("add_rate", &MJP::add_rate,
+            pybind11::arg("rate"))
+        .def("add_rate", &MJP::make_add_rate,
+            pybind11::arg("name"),
+            pybind11::arg("value"))
         .def("add_event", &MJP::add_event,
             pybind11::arg("event"))
         .def("add_event", &MJP::make_add_event,
@@ -90,6 +95,8 @@ void init_models(pybind11::module_ &m){
         pybind11::arg("event"))
         .def("event_index", static_cast<std::vector<unsigned> (MJP::*)(const std::vector<std::string>& )>(&MJP::event_index),
             pybind11::arg("event_list"))
+        .def("rate_index", static_cast<unsigned (MJP::*)(const std::string& )>(&MJP::rate_index),
+        pybind11::arg("rate"))
         .def("parse_clusters", &MJP::parse_clusters);
     return;
 }

@@ -59,6 +59,12 @@ class Event {
     inline void set_name(std::string name_) {
         name = name_;
     }
+    inline void set_rate(const Rate& rate_) {
+        rate = rate_;
+    }
+    inline void set_rate(double rate_) {
+        rate.set_value(rate_);
+    }
     inline void set_species_map(pybind11::dict species_dict) {
         species_list = ut::extract_dict_keys<std::string>(species_dict);
         species_map = ut::extract_dict_values<Species*>(species_dict);

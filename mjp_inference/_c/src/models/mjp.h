@@ -23,6 +23,7 @@ class MJP {
     unsigned event_index(const std::string& event);
     std::vector<unsigned> event_index(const std::vector<std::string>& event);
     std::vector<std::vector<unsigned>> parse_clusters(std::vector<std::vector<std::string>> clusters);
+    unsigned rate_index(const std::string& rate);
 
     // interface functions
     inline void add_species(Species species) {
@@ -33,10 +34,24 @@ class MJP {
     inline void make_add_species(std::string name, int lower, int upper, int default_value) {
         add_species(Species(name, lower, upper, default_value));
     }
+    inline void add_rate(Rate rate) {
+        rate_map.push_back(rate);
+        rate_list.push_back(rate.get_name());
+    }
+    inline void make_add_rate(const std::string& name, double value) {
+        add_rate(Rate(name, value));
+    }
     inline void add_event(Event event) {
+        // set species map if not given
         if (event.get_species_map().size() == 0) {
             event.set_species_map(get_species_pointers());
         }
+        // update rates
+        const std::string& rate_name = event.get_rate().get_name();
+        if (std::find(rate_list.begin(), rate_list.end(), rate_name) != rate_list.end()) {
+            event.set_rate(get_rate(rate_name).get_value());
+        }
+        // store event
         event_map.push_back(event);
         event_list.push_back(event.get_name());
         num_events++;
@@ -73,6 +88,12 @@ class MJP {
     }
     inline const Event& get_event(const std::string& event) {
         return(get_event(event_index(event)));
+    }
+    inline const Rate& get_rate(unsigned ind) {
+        return(rate_map[ind]);
+    }
+    inline const Rate& get_rate(const std::string& rate) {
+        return(get_rate(rate_index(rate)));
     }
     inline std::vector<unsigned> get_local_dims(const std::vector<unsigned>& node_list) {
         std::vector<unsigned> local_dims(node_list.size());
@@ -143,6 +164,7 @@ class MJP {
     std::string name;
     std::vector<Species> species_map;
     std::vector<Event> event_map;
+    std::vector<Rate> rate_map;
     unsigned num_species;
     unsigned num_events;
     unsigned num_states;
