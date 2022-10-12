@@ -41,8 +41,9 @@ class MJP {
         event_list.push_back(event.get_name());
         num_events++;
     }
-    inline void make_add_event(std::string name, std::vector<std::string> input_species, std::vector<std::string> output_species, pybind11::tuple hazard_callable, std::vector<int> change_vec) {
-        add_event(Event(name, input_species, output_species, hazard_callable, change_vec, get_species_pointers()));
+    inline void make_add_event(std::string name, std::vector<std::string> input_species, std::vector<std::string> output_species, double rate_, pybind11::tuple hazard_callable, std::vector<int> change_vec) {
+        Rate rate(name, rate_);
+        add_event(Event(name, input_species, output_species, rate, hazard_callable, change_vec, get_species_pointers()));
     }
 
     // getters
@@ -95,6 +96,9 @@ class MJP {
     inline std::vector<std::string> get_event_list() {
         return(event_list);
     }
+    inline const std::vector<std::string>& get_rate_list () const {
+        return(rate_list);
+    }
     inline std::vector<Species>& get_species_map() {
         return(species_map);
     }
@@ -144,6 +148,8 @@ class MJP {
     unsigned num_states;
     std::vector<std::string> species_list;
     std::vector<std::string> event_list;
+    std::vector<std::string> rate_list;
+    std::vector<unsigned> event_to_rate_map;
     std::vector<int> dims;
     std::vector<double> default_state;
     std::vector<std::vector<unsigned>> input_species;

@@ -8,6 +8,7 @@ _Shape = typing.Tuple[int, ...]
 __all__ = [
     "Event",
     "MJP",
+    "Rate",
     "Species"
 ]
 
@@ -16,7 +17,7 @@ class Event():
     @typing.overload
     def __init__(self, event: Event) -> None: ...
     @typing.overload
-    def __init__(self, name: str, input_species: typing.List[str], output_species: typing.List[str], hazard_callable: tuple, change_vec: typing.List[int], species_dict: dict = {}) -> None: ...
+    def __init__(self, name: str, input_species: typing.List[str], output_species: typing.List[str], rate: Rate, hazard_callable: tuple, change_vec: typing.List[int], species_dict: dict = {}) -> None: ...
     def hazard(self, state: numpy.ndarray[numpy.float64]) -> float: ...
     @property
     def change_vec(self) -> typing.List[int]:
@@ -52,7 +53,7 @@ class MJP():
     @typing.overload
     def add_event(self, event: Event) -> None: ...
     @typing.overload
-    def add_event(self, name: str, input_species: typing.List[str], output_species: typing.List[str], hazard_callable: tuple, change_vec: typing.List[int]) -> None: ...
+    def add_event(self, name: str, input_species: typing.List[str], output_species: typing.List[str], rate: float, hazard_callable: tuple, change_vec: typing.List[int]) -> None: ...
     @typing.overload
     def add_species(self, name: str, lower: int = 0, upper: int = 1, default_value: int = 0) -> None: ...
     @typing.overload
@@ -138,6 +139,19 @@ class MJP():
     def species_list(self) -> typing.List[str]:
         """
         :type: typing.List[str]
+        """
+    pass
+class Rate():
+    def __init__(self, name: str, value: float = 1) -> None: ...
+    @property
+    def name(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def value(self) -> float:
+        """
+        :type: float
         """
     pass
 class Species():

@@ -1,4 +1,5 @@
 #include "species.h"
+#include "rate.h"
 #include "event.h"
 #include "mjp.h"
 

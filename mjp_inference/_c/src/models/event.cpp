@@ -2,10 +2,11 @@
 
 // constructor
 
-Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_) :
+Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_) :
     name(name_),
     input_species(input_species_),
     output_species(output_species_),
+    rate(rate_),
     hazard_callable(hazard_callable_),
     hazard_capsule(hazard_callable[0]),
     hazard_fun(reinterpret_cast<double (*)(double*)>(hazard_capsule.get_pointer())),
@@ -18,10 +19,11 @@ Event::Event(std::string name_, std::vector<std::string> input_species_, std::ve
         }
     }
 
-Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_) :
+Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_) :
     name(name_),
     input_species(input_species_),
     output_species(output_species_),
+    rate(rate_),
     hazard_callable(hazard_callable_),
     hazard_capsule(hazard_callable[0]),
     hazard_fun(reinterpret_cast<double (*)(double*)>(hazard_capsule.get_pointer())), 

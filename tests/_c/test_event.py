@@ -13,7 +13,7 @@ forward_sig = types.double(types.CPointer(types.double))
 c1 = 0.2
 
 def const_func(x):
-    return(x[0])
+    return(1.0)
 
 def bimolecular(x):
     return(x[0]*x[1])
@@ -38,8 +38,22 @@ try:
 except ValueError:
     print("Captured wrong output species order")
 
-# test projection
-conversion = mjpi.Event("conversion", input_species=['A', 'B'], output_species=['A', 'B', 'X', 'Y'], hazard=bimolecular, change_vec=[-1, -1, 1, 1])
+# test more complicated event
+conversion = mjpi.Event("conversion", input_species=['A', 'B'], output_species=['A', 'B', 'X', 'Y'], rate=0.5, hazard=bimolecular, change_vec=[-1, -1, 1, 1])
+
+state = np.array([4, 5])
+haz = conversion.hazard(state)
+print("test full hazard", haz)
+
+# test reaction formalism
+conversion = mjpi.Reaction("conversion", reaction='1 A + 1 B -> 1 X + 1 Y', rate=0.5, propensity=bimolecular)
+
+state = np.array([4, 5])
+haz = conversion.hazard(state)
+print("test full hazard", haz)
+
+# test mass action
+conversion = mjpi.MassAction("conversion", reaction='1 A + 1 B -> 1 X + 1 Y', rate=0.5)
 
 state = np.array([4, 5])
 haz = conversion.hazard(state)

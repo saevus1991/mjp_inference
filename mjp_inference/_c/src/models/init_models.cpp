@@ -14,19 +14,27 @@ void init_models(pybind11::module_ &m){
         .def_property("default", &Species::get_default, &Species::set_default)
         .def_property("index", &Species::get_index, &Species::set_index)
         .def_property_readonly("dim", &Species::get_index);
+    pybind11::class_<Rate>(m, "Rate")
+        .def(pybind11::init<const std::string&, double>(),
+            pybind11::arg("name"),
+            pybind11::arg("value") = 1)
+        .def_property_readonly("name", &Rate::get_name)
+        .def_property_readonly("value", &Rate::get_value);
     pybind11::class_<Event>(m, "Event")
         .def(pybind11::init<const Event&>(),
             pybind11::arg("event"))
-        .def(pybind11::init<std::string, std::vector<std::string>, std::vector<std::string>, pybind11::tuple,  std::vector<int>, pybind11::dict>(),
+        .def(pybind11::init<std::string, std::vector<std::string>, std::vector<std::string>, Rate, pybind11::tuple, std::vector<int>, pybind11::dict>(),
             pybind11::arg("name"),
             pybind11::arg("input_species"),
             pybind11::arg("output_species"),
+            pybind11::arg("rate"),
             pybind11::arg("hazard_callable"),
             pybind11::arg("change_vec"),
             pybind11::arg("species_dict")=pybind11::dict())
         .def_property("name", &Event::get_name, &Event::set_name)
         .def_property_readonly("input_species", &Event::get_input_species)
         .def_property_readonly("output_species", &Event::get_output_species)
+        .def_property_readonly("rate", &Event::get_rate)
         .def_property_readonly("change_vec", &Event::get_change_vec)
         .def_property_readonly("species_dict", &Event::get_species_dict)
         .def("hazard", &Event::hazard_np,
@@ -44,6 +52,7 @@ void init_models(pybind11::module_ &m){
         .def_property_readonly("event_dict", &MJP::get_event_dict)
         .def_property_readonly("species_list", &MJP::get_species_list)
         .def_property_readonly("event_list", &MJP::get_event_list)
+        .def_property_readonly("rate_list", &MJP::get_rate_list)
         .def_property_readonly("input_species", &MJP::get_input_species)
         .def_property_readonly("output_species", &MJP::get_output_species)
         .def_property_readonly("change_vectors", &MJP::get_change_vectors)
@@ -60,6 +69,7 @@ void init_models(pybind11::module_ &m){
             pybind11::arg("name"),
             pybind11::arg("input_species"),
             pybind11::arg("output_species"),
+            pybind11::arg("rate"),
             pybind11::arg("hazard_callable"),
             pybind11::arg("change_vec"))
         .def("build", &MJP::build)

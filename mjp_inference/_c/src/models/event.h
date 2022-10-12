@@ -4,6 +4,7 @@
 
 #include "../../types.h"
 #include "species.h"
+#include "rate.h"
 #include "../util/conversion.h"
 #include "../util/misc.h"
 
@@ -12,8 +13,8 @@ class Event {
 
     public:
     // constructor
-    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_);
-    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_);
+    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_);
+    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_);
 
     // helpers
     std::vector<std::string> build_species_list(std::vector<Species*>& species_map_);
@@ -28,6 +29,9 @@ class Event {
     }
     inline const std::vector<std::string>& get_output_species() const {
         return(output_species);
+    }
+    inline const Rate& get_rate() const {
+        return(rate);
     }
     inline ArrayFun get_hazard_fun() {
         return(hazard_fun);
@@ -66,9 +70,9 @@ class Event {
         assert_order();
     }
 
-    // main functions
+    // main functions #TODO: make consistent with hazard and propensity
     inline double hazard(double* state) {
-        return(hazard_fun(state));
+        return(rate.get_value() * hazard_fun(state));
     }
     inline double hazard_np(np_array_c state) {
         return(hazard((double*)state.data()));
@@ -78,6 +82,7 @@ class Event {
     std::string name;
     std::vector<std::string> input_species;
     std::vector<std::string> output_species;
+    Rate rate;
     pybind11::tuple hazard_callable;
     pybind11::capsule hazard_capsule;
     ArrayFun hazard_fun;
