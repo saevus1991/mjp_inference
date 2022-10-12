@@ -1,0 +1,11 @@
+# env
+.vscode
+.venv
+
+# python
+*.pyd
+*.pyc
+
+# c++
+**\build
+include
