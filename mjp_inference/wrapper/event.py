@@ -15,7 +15,7 @@ ArrayFun = types.double(types.CPointer(types.double))
 
 class Event(_Event):
 
-    def __init__(self, name: str, input_species: list=None, output_species: list=None, rate=None, hazard: Callable=None, change_vec: list[int]=None):
+    def __init__(self, name: str, input_species: list=None, output_species: list=None, rate=None, propensity: Callable=None, change_vec: list[int]=None):
         # parse rate
         if rate is None:
             rate = Rate(name, 1.0)
@@ -24,10 +24,10 @@ class Event(_Event):
         elif isinstance(rate, str):
             rate = Rate(rate, 1.0)
         # parse hazard
-        hazard_compiled = cfunc(ArrayFun, nopython=True)(hazard)
-        hazard_callable = LowLevelCallable(hazard_compiled.ctypes)     
+        propensity_compiled = cfunc(ArrayFun, nopython=True)(propensity)
+        propensity_callable = LowLevelCallable(propensity_compiled.ctypes)     
         # call Event constructor
-        _Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, hazard_callable=hazard_callable, change_vec=change_vec)
+        _Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, propensity_callable=propensity_callable, change_vec=change_vec)
 
 
 class Reaction(Event):
@@ -39,7 +39,7 @@ class Reaction(Event):
         input_species, input_numbers, output_species, change_vec = self.parse_reaction()
         self.input_numbers = input_numbers
         # call Event constructor
-        Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, hazard=propensity, change_vec=change_vec)
+        Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, propensity=propensity, change_vec=change_vec)
 
     def parse_reaction(self):
         # split reaction in left and right side
@@ -80,15 +80,15 @@ class MassAction(Reaction):
     def __init__(self, name: str, reaction: str=None,  rate: float=None):
         # store reaction
         self.reaction = reaction
-        # parse reaction and hazard
+        # parse reaction
         input_species, input_numbers, output_species, change_vec = self.parse_reaction()
         self.input_numbers = input_numbers
-        # parse hazard
-        hazard = self.parse_hazard()
+        # parse propensity
+        propensity = self.parse_propensity()
         # call Event constructor
-        Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, hazard=hazard, change_vec=change_vec)
+        Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, propensity=propensity, change_vec=change_vec)
 
-    def parse_hazard(self):
+    def parse_propensity(self):
         input_numbers = np.array(self.input_numbers).astype(np.float64)
         size = len(input_numbers)
         # parse factorial functio

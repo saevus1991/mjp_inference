@@ -13,8 +13,8 @@ class Event {
 
     public:
     // constructor
-    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_);
-    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_);
+    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple propensity_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_);
+    Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple propensity_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_);
 
     // helpers
     std::vector<std::string> build_species_list(std::vector<Species*>& species_map_);
@@ -33,8 +33,8 @@ class Event {
     inline const Rate& get_rate() const {
         return(rate);
     }
-    inline ArrayFun get_hazard_fun() {
-        return(hazard_fun);
+    inline ArrayFun get_propensity_fun() {
+        return(propensity_fun);
     }
     inline const std::vector<int>& get_change_vec() const {
         return(change_vec);
@@ -77,8 +77,14 @@ class Event {
     }
 
     // main functions #TODO: make consistent with hazard and propensity
+    inline double propensity(double* state) {
+        return(propensity_fun(state));
+    }
+    inline double propensity_np(np_array_c state) {
+        return(propensity((double*)state.data()));
+    }
     inline double hazard(double* state) {
-        return(rate.get_value() * hazard_fun(state));
+        return(rate.get_value() * propensity_fun(state));
     }
     inline double hazard_np(np_array_c state) {
         return(hazard((double*)state.data()));
@@ -89,9 +95,9 @@ class Event {
     std::vector<std::string> input_species;
     std::vector<std::string> output_species;
     Rate rate;
-    pybind11::tuple hazard_callable;
-    pybind11::capsule hazard_capsule;
-    ArrayFun hazard_fun;
+    pybind11::tuple propensity_callable;
+    pybind11::capsule propensity_capsule;
+    ArrayFun propensity_fun;
     std::vector<int> change_vec;
     std::vector<std::string> species_list;
     std::vector<Species*> species_map;

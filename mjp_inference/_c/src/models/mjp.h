@@ -177,7 +177,6 @@ class MJP {
     std::vector<std::vector<unsigned>> input_species;
     std::vector<std::vector<unsigned>> output_species;
     std::vector<std::vector<int>> change_vectors;
-    std::vector<ArrayFun> hazard_funs;
 
 };
 

@@ -20,7 +20,7 @@ def bimolecular(x):
 
 
 # set up event
-birth = mjpi.Event("birth", input_species=['mRNA'], output_species=['mRNA'], hazard=const_func, change_vec=[1])
+birth = mjpi.Event("birth", input_species=['mRNA'], output_species=['mRNA'], propensity=const_func, change_vec=[1])
 
 print(birth.name)
 print(birth.input_species)
@@ -34,12 +34,12 @@ x = mjpi.Species(name='X', lower=0, upper=100, default=0)
 y = mjpi.Species(name='Y', lower=0, upper=100, default=0)
 species_dict = {'A': a, 'B': b, 'X': x, 'Y': y}
 try:
-    conversion = mjpi.Event("conversion", input_species=['A', 'B'], output_species=['A', 'X', 'B', 'Y'], hazard=bimolecular, change_vec=[-1, -1, 1, 1])
+    conversion = mjpi.Event("conversion", input_species=['A', 'B'], output_species=['A', 'X', 'B', 'Y'], propensity=bimolecular, change_vec=[-1, -1, 1, 1])
 except ValueError:
     print("Captured wrong output species order")
 
 # test more complicated event
-conversion = mjpi.Event("conversion", input_species=['A', 'B'], output_species=['A', 'B', 'X', 'Y'], rate=0.5, hazard=bimolecular, change_vec=[-1, -1, 1, 1])
+conversion = mjpi.Event("conversion", input_species=['A', 'B'], output_species=['A', 'B', 'X', 'Y'], rate=0.5, propensity=bimolecular, change_vec=[-1, -1, 1, 1])
 
 state = np.array([4, 5])
 haz = conversion.hazard(state)
@@ -50,11 +50,13 @@ conversion = mjpi.Reaction("conversion", reaction='1 A + 1 B -> 1 X + 1 Y', rate
 
 state = np.array([4, 5])
 haz = conversion.hazard(state)
-print("test full hazard", haz)
+prop = conversion.propensity(state)
+print("hazard", haz, "propensity", prop)
 
 # test mass action
 conversion = mjpi.MassAction("conversion", reaction='1 A + 1 B -> 1 X + 1 Y', rate=0.5)
 
 state = np.array([4, 5])
 haz = conversion.hazard(state)
-print("test full hazard", haz)
+prop = conversion.propensity(state)
+print("hazard", haz, "propensity", prop)

@@ -2,14 +2,14 @@
 
 // constructor
 
-Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_) :
+Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple propensity_callable_, std::vector<int> change_vec_, pybind11::dict species_dict_) :
     name(name_),
     input_species(input_species_),
     output_species(output_species_),
     rate(rate_),
-    hazard_callable(hazard_callable_),
-    hazard_capsule(hazard_callable[0]),
-    hazard_fun(reinterpret_cast<double (*)(double*)>(hazard_capsule.get_pointer())),
+    propensity_callable(propensity_callable_),
+    propensity_capsule(propensity_callable[0]),
+    propensity_fun(reinterpret_cast<double (*)(double*)>(propensity_capsule.get_pointer())),
     change_vec(change_vec_),
     species_list(ut::extract_dict_keys<std::string>(species_dict_)),
     species_map(ut::extract_dict_values<Species*>(species_dict_))
@@ -19,14 +19,14 @@ Event::Event(std::string name_, std::vector<std::string> input_species_, std::ve
         }
     }
 
-Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple hazard_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_) :
+Event::Event(std::string name_, std::vector<std::string> input_species_, std::vector<std::string> output_species_, Rate rate_, pybind11::tuple propensity_callable_, std::vector<int> change_vec_, std::vector<Species*> species_map_) :
     name(name_),
     input_species(input_species_),
     output_species(output_species_),
     rate(rate_),
-    hazard_callable(hazard_callable_),
-    hazard_capsule(hazard_callable[0]),
-    hazard_fun(reinterpret_cast<double (*)(double*)>(hazard_capsule.get_pointer())), 
+    propensity_callable(propensity_callable_),
+    propensity_capsule(propensity_callable[0]),
+    propensity_fun(reinterpret_cast<double (*)(double*)>(propensity_capsule.get_pointer())), 
     change_vec(change_vec_), 
     species_list(build_species_list(species_map_)),
     species_map(species_map_)

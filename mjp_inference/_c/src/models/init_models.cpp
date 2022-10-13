@@ -28,7 +28,7 @@ void init_models(pybind11::module_ &m){
             pybind11::arg("input_species"),
             pybind11::arg("output_species"),
             pybind11::arg("rate"),
-            pybind11::arg("hazard_callable"),
+            pybind11::arg("propensity_callable"),
             pybind11::arg("change_vec"),
             pybind11::arg("species_dict")=pybind11::dict())
         .def_property("name", &Event::get_name, &Event::set_name)
@@ -37,6 +37,8 @@ void init_models(pybind11::module_ &m){
         .def_property_readonly("rate", &Event::get_rate)
         .def_property_readonly("change_vec", &Event::get_change_vec)
         .def_property_readonly("species_dict", &Event::get_species_dict)
+        .def("propensity", &Event::propensity_np,
+            pybind11::arg("state"))
         .def("hazard", &Event::hazard_np,
             pybind11::arg("state"));
     pybind11::class_<MJP>(m, "MJP")

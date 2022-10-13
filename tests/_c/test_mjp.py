@@ -23,27 +23,27 @@ model.add_species(species)
 # add events
 def hazard(x):
     return(0.001*x[0])
-event = mjpi.Event(name='Activation', input_species=['G0'], output_species=['G0', 'G1'], hazard=hazard, change_vec=[-1, 1])
+event = mjpi.Event(name='Activation', input_species=['G0'], output_species=['G0', 'G1'], propensity=hazard, change_vec=[-1, 1])
 model.add_event(event)
 def hazard(x):
     return(0.001*x[0])
-event = mjpi.Event(name='Dectivation', input_species=['G1'], output_species=['G0', 'G1'], hazard=hazard, change_vec=[1, -1])
+event = mjpi.Event(name='Dectivation', input_species=['G1'], output_species=['G0', 'G1'], propensity=hazard, change_vec=[1, -1])
 model.add_event(event)
 def hazard(x):
     return(0.06*x[0])
-event = mjpi.Event(name='Transcription', input_species=['G1'], output_species=['mRNA'], hazard=hazard, change_vec=[1])
+event = mjpi.Event(name='Transcription', input_species=['G1'], output_species=['mRNA'], propensity=hazard, change_vec=[1])
 model.add_event(event)
 def hazard(x):
     return(0.001*x[0])
-event = mjpi.Event(name='mRNA Decay', input_species=['mRNA'], output_species=['mRNA'], hazard=hazard, change_vec=[-1])
+event = mjpi.Event(name='mRNA Decay', input_species=['mRNA'], output_species=['mRNA'], propensity=hazard, change_vec=[-1])
 model.add_event(event)
 def hazard(x):
     return(0.01*x[0])
-event = mjpi.Event(name='Translation', input_species=['mRNA'], output_species=['Protein'], hazard=hazard, change_vec=[1])
+event = mjpi.Event(name='Translation', input_species=['mRNA'], output_species=['Protein'], propensity=hazard, change_vec=[1])
 model.add_event(event)
 def hazard(x):
     return(0.0009*x[0])
-event = mjpi.Event(name='Protein Decay', input_species=['Protein'], output_species=['Protein'], hazard=hazard, change_vec=[-1])
+event = mjpi.Event(name='Protein Decay', input_species=['Protein'], output_species=['Protein'], propensity=hazard, change_vec=[-1])
 model.add_event(event)
 model.build()
 

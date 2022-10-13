@@ -34,8 +34,6 @@ void MJP::build() {
         // output list
         species_loc = event_map[i].get_output_species();
         output_species.push_back(species_index(species_loc));
-        // hazard funs
-        hazard_funs.push_back(event_map[i].get_hazard_fun());
         // change vecs
         change_vectors.push_back(event_map[i].get_change_vec());
     }
@@ -127,7 +125,6 @@ void MJP::hazard(double* state, double* haz) {
             local_state[j] = state[ind];
         }
         // eval local hazard 
-        // haz[i] = hazard_funs[i](local_state.data());
         haz[i] = event_map[i].hazard(local_state.data());
     }
 }
