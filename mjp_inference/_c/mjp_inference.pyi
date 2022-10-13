@@ -9,6 +9,7 @@ __all__ = [
     "Event",
     "MJP",
     "Rate",
+    "Simulator",
     "Species"
 ]
 
@@ -169,6 +170,13 @@ class Rate():
         """
         :type: float
         """
+    pass
+class Simulator():
+    def __init__(self, model: MJP, initial: numpy.ndarray[numpy.float64, _Shape[m, 1]], tspan: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> None: ...
+    @typing.overload
+    def simulate(self) -> dict: ...
+    @typing.overload
+    def simulate(self, t_eval: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
     pass
 class Species():
     def __init__(self, name: str, lower: int = 0, upper: int = 1, default: int = 0) -> None: ...

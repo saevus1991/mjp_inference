@@ -76,7 +76,6 @@ class Event {
         assert_order();
     }
 
-    // main functions #TODO: make consistent with hazard and propensity
     inline double propensity(double* state) {
         return(propensity_fun(state));
     }
