@@ -8,6 +8,7 @@ _Shape = typing.Tuple[int, ...]
 __all__ = [
     "Event",
     "MJP",
+    "MasterEquation",
     "Rate",
     "Simulator",
     "Species"
@@ -156,6 +157,15 @@ class MJP():
     def species_list(self) -> typing.List[str]:
         """
         :type: typing.List[str]
+        """
+    pass
+class MasterEquation():
+    def __init__(self, model: MJP) -> None: ...
+    def forward(self, arg0: float, arg1: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
+    @property
+    def generator(self) -> scipy.sparse.csr_matrix[numpy.float64]:
+        """
+        :type: scipy.sparse.csr_matrix[numpy.float64]
         """
     pass
 class Rate():
