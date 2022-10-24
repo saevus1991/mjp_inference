@@ -15,14 +15,17 @@ class MasterEquation {
     void build_generator();
 
     // getters
-    inline csr_mat& get_generator() {
+    inline const csr_mat& get_generator() {
         return(generator);
+    }
+    inline const std::vector<csr_mat> get_base_generators() {
+        return(base_generators);
     }
 
     // main functions
     np_array forward(double t, np_array_c prob);
 
-    private:
+    protected:
     MJP* mjp;
     double tol;
     std::vector<csr_mat> base_generators;

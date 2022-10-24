@@ -7,6 +7,7 @@ _Shape = typing.Tuple[int, ...]
 
 __all__ = [
     "Event",
+    "MEInference",
     "MJP",
     "MasterEquation",
     "Rate",
@@ -54,6 +55,20 @@ class Event():
     def species_dict(self) -> dict:
         """
         :type: dict
+        """
+    pass
+class MasterEquation():
+    def __init__(self, model: MJP) -> None: ...
+    def forward(self, arg0: float, arg1: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
+    @property
+    def base_generators(self) -> typing.List[scipy.sparse.csr_matrix[numpy.float64]]:
+        """
+        :type: typing.List[scipy.sparse.csr_matrix[numpy.float64]]
+        """
+    @property
+    def generator(self) -> scipy.sparse.csr_matrix[numpy.float64]:
+        """
+        :type: scipy.sparse.csr_matrix[numpy.float64]
         """
     pass
 class MJP():
@@ -129,6 +144,11 @@ class MJP():
         :type: int
         """
     @property
+    def num_rates(self) -> int:
+        """
+        :type: int
+        """
+    @property
     def num_species(self) -> int:
         """
         :type: int
@@ -159,13 +179,12 @@ class MJP():
         :type: typing.List[str]
         """
     pass
-class MasterEquation():
+class MEInference(MasterEquation):
     def __init__(self, model: MJP) -> None: ...
-    def forward(self, arg0: float, arg1: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
     @property
-    def generator(self) -> scipy.sparse.csr_matrix[numpy.float64]:
+    def param_generators(self) -> typing.List[scipy.sparse.csr_matrix[numpy.float64]]:
         """
-        :type: scipy.sparse.csr_matrix[numpy.float64]
+        :type: typing.List[scipy.sparse.csr_matrix[numpy.float64]]
         """
     pass
 class Rate():

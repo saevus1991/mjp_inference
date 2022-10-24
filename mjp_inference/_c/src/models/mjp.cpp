@@ -5,7 +5,8 @@
 MJP::MJP(std::string name_) : 
     name(name_),
     num_species(0),
-    num_events(0)
+    num_events(0),
+    num_rates(0)
     {}
 
 // setup helper
@@ -45,6 +46,7 @@ void MJP::build() {
                 rate_list.push_back(rate_name);
             }
         }
+        num_rates = rate_list.size();
     }
     // make rate map
     for (int i = 0; i < num_events; i++) {

@@ -40,6 +40,7 @@ class MJP {
     }
     inline void make_add_rate(const std::string& name, double value) {
         add_rate(Rate(name, value));
+        num_rates++;
     }
     inline void add_event(Event event) {
         // set species map if not given
@@ -60,6 +61,9 @@ class MJP {
         Rate rate(name, rate_);
         add_event(Event(name, input_species, output_species, rate, hazard_callable, change_vec, get_species_pointers()));
     }
+    unsigned event2rate(unsigned event_index) {
+        return(event_to_rate_map[event_index]);
+    }
 
     // getters
     inline const std::string& get_name() const{
@@ -70,6 +74,9 @@ class MJP {
     }
     inline unsigned get_num_events() {
         return(num_events);
+    }
+    inline unsigned get_num_rates() {
+        return(num_rates);
     }
     inline unsigned get_num_states() {
         return(num_states);
@@ -168,6 +175,7 @@ class MJP {
     unsigned num_species;
     unsigned num_events;
     unsigned num_states;
+    unsigned num_rates;
     std::vector<std::string> species_list;
     std::vector<std::string> event_list;
     std::vector<std::string> rate_list;

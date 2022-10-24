@@ -49,8 +49,8 @@ void MasterEquation::build_base_generators() {
 }
 
 void MasterEquation::build_generator() {
-    generator = base_generators[0];
-    for (int i = 1; i < base_generators.size(); i++) {
+    generator = csr_mat(mjp->get_num_states(), mjp->get_num_states());
+    for (int i = 0; i < base_generators.size(); i++) {
         generator = generator + base_generators[i];
     }
 }

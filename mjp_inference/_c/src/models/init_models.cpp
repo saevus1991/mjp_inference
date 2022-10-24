@@ -48,6 +48,7 @@ void init_models(pybind11::module_ &m){
         .def_property_readonly("num_species", &MJP::get_num_species)
         .def_property_readonly("num_events", &MJP::get_num_events)
         .def_property_readonly("num_states", &MJP::get_num_states)
+        .def_property_readonly("num_rates", &MJP::get_num_rates)
         .def_property_readonly("dims", &MJP::get_dims)
         .def_property_readonly("default_state", &MJP::get_default_state)
         .def_property_readonly("species_dict", &MJP::get_species_dict)
