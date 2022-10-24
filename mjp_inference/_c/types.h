@@ -14,10 +14,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
-
-// function types
-typedef double (*ArrayFun)(double*);
-
 // numpy types
 typedef pybind11::array_t<double> np_array;
 typedef pybind11::array_t<double, pybind11::array::c_style | pybind11::array::forcecast> np_array_c;
@@ -30,3 +26,6 @@ typedef Eigen::SparseMatrix<double> csc_mat;
 typedef Eigen::SparseMatrix<double, Eigen::RowMajor> csr_mat;
 typedef Eigen::Triplet<double> triplet;
 
+// function types
+typedef double (*ArrayFun)(double*);
+typedef std::function<vec (vec&)> Operator;

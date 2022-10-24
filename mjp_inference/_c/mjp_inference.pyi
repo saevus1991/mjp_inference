@@ -3,10 +3,12 @@ from __future__ import annotations
 import mjp_inference
 import typing
 import numpy
+import scipy.sparse
 _Shape = typing.Tuple[int, ...]
 
 __all__ = [
     "Event",
+    "Krylov",
     "MEInference",
     "MJP",
     "MasterEquation",
@@ -56,6 +58,13 @@ class Event():
         """
         :type: dict
         """
+    pass
+class Krylov():
+    def __init__(self, generator: scipy.sparse.csr_matrix[numpy.float64], initial: numpy.ndarray[numpy.float64, _Shape[m, 1]], order: int) -> None: ...
+    def eval(self, arg0: float) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def expand(self, arg0: int) -> None: ...
+    def get_proj(self) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
+    def get_span(self) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
     pass
 class MasterEquation():
     def __init__(self, model: MJP) -> None: ...

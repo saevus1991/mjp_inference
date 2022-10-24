@@ -2,6 +2,7 @@
 #include "src/models/init_models.h"
 #include "src/ssa/init_ssa.h"
 #include "src/me/init_me.h"
+#include "src/krylov/krylov_init.h"
 
 
 
@@ -10,4 +11,5 @@ PYBIND11_MODULE(mjp_inference, m) {
     init_models(m);
     init_ssa(m);
     init_me(m);
+    krylov_init(m);
 } 
