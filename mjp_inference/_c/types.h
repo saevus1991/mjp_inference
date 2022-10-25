@@ -27,5 +27,8 @@ typedef Eigen::SparseMatrix<double, Eigen::RowMajor> csr_mat;
 typedef Eigen::Triplet<double> triplet;
 
 // function types
-typedef double (*ArrayFun)(double*);
+typedef double (*ArrayFun)(double*); 
+typedef void (*Transformation)(double*, double*, double*);
+typedef void (*Sampler)(double*, double*, double*, double*); 
+typedef double (*Llh)(double*, double*); 
 typedef std::function<vec (vec&)> Operator;

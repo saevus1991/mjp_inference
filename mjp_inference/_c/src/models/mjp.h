@@ -102,6 +102,14 @@ class MJP {
     inline const Rate& get_rate(const std::string& rate) {
         return(get_rate(rate_index(rate)));
     }
+    inline np_array get_rate_array() {
+        np_array rate_array(num_rates);
+        double* rate_array_ptr = (double*) rate_array.data();
+        for (unsigned i = 0; i < num_rates; i++) {
+            rate_array_ptr[i] = rate_map[i].get_value();
+        }
+        return(rate_array);
+    }
     inline std::vector<unsigned> get_local_dims(const std::vector<unsigned>& node_list) {
         std::vector<unsigned> local_dims(node_list.size());
         for (int i = 0; i < node_list.size(); i++) {
@@ -160,6 +168,10 @@ class MJP {
     vec hazard(vec& state);
     vec hazard(Eigen::Map<vec>& state);
     np_array hazard_out(np_array_c state);
+    void propensity(double* state, double* prop);
+    vec propensity(vec& state);
+    vec propensity(Eigen::Map<vec>& state);
+    np_array propensity_out(np_array_c state);
     void update_state(double* state, unsigned event);
     void update_state(vec&state, unsigned event);
     np_array update_state_out(np_array_c state, unsigned event);

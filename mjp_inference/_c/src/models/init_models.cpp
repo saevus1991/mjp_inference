@@ -56,6 +56,7 @@ void init_models(pybind11::module_ &m){
         .def_property_readonly("species_list", &MJP::get_species_list)
         .def_property_readonly("event_list", &MJP::get_event_list)
         .def_property_readonly("rate_list", &MJP::get_rate_list)
+        .def_property_readonly("rate_array", &MJP::get_rate_array)
         .def_property_readonly("input_species", &MJP::get_input_species)
         .def_property_readonly("output_species", &MJP::get_output_species)
         .def_property_readonly("change_vectors", &MJP::get_change_vectors)
@@ -82,6 +83,8 @@ void init_models(pybind11::module_ &m){
             pybind11::arg("change_vec"))
         .def("build", &MJP::build)
         .def("hazard", &MJP::hazard_out,
+            pybind11::arg("state"))
+        .def("propensity", &MJP::propensity_out,
             pybind11::arg("state"))
         .def("update_state", &MJP::update_state_out,
             pybind11::arg("state"),

@@ -2,18 +2,22 @@
 
 // constructor
 
-MasterEquation::MasterEquation(MJP* mjp_) :
+MasterEquation::MasterEquation(MJP* mjp_, double tol_) :
     mjp(mjp_),
-    tol(1e-12)
+    tol(tol_)
+    {}
+
+MasterEquation::MasterEquation(MJP* mjp_) :
+    MasterEquation(mjp_, 1e-12)
     {
-        build_base_generators();
-        build_generator();
+        hazard_generators = build_hazard_generators();
+        generator = build_generator();
     }
 
 
 // helpers
 
-void MasterEquation::build_base_generators() {
+std::vector<csr_mat> MasterEquation::build_hazard_generators() {
     // preparations
     unsigned num_events = mjp->get_num_events();
     unsigned num_states = mjp->get_num_states();
@@ -40,19 +44,20 @@ void MasterEquation::build_base_generators() {
         }
     }
     // set up generators from triplet
-    base_generators = std::vector<csr_mat>(num_events);
+    std::vector<csr_mat> hazard_generators(num_events);
     for (int i = 0; i < num_events; i++) {
-        base_generators[i] = csr_mat(num_states, num_states);
-        base_generators[i].setFromTriplets(coefficients[i].begin(), coefficients[i].end());
+        hazard_generators[i] = csr_mat(num_states, num_states);
+        hazard_generators[i].setFromTriplets(coefficients[i].begin(), coefficients[i].end());
     }
-    return;
+    return(hazard_generators);
 }
 
-void MasterEquation::build_generator() {
-    generator = csr_mat(mjp->get_num_states(), mjp->get_num_states());
-    for (int i = 0; i < base_generators.size(); i++) {
-        generator = generator + base_generators[i];
+csr_mat MasterEquation::build_generator() {
+    csr_mat generator(mjp->get_num_states(), mjp->get_num_states());
+    for (int i = 0; i < hazard_generators.size(); i++) {
+        generator = generator + hazard_generators[i];
     }
+    return(generator);
 }
 
 // main functions

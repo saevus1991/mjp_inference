@@ -149,6 +149,39 @@ np_array MJP::hazard_out(np_array_c state) {
     return(haz);
 }
 
+void MJP::propensity(double* state, double* prop) {
+    // iterate over events
+    for (int i = 0; i < num_events; i++) {
+        // create local state
+        unsigned local_size = input_species[i].size();
+        std::vector<double> local_state(local_size);
+        for (int j = 0; j < local_size; j++) {
+            unsigned ind = input_species[i][j];
+            local_state[j] = state[ind];
+        }
+        // eval local hazard 
+        prop[i] = event_map[i].propensity(local_state.data());
+    }
+}
+
+vec MJP::propensity(vec& state) {
+    vec prop(num_events);
+    propensity(state.data(), prop.data());
+    return(prop);
+}
+
+vec MJP::propensity(Eigen::Map<vec>& state) {
+    vec prop(num_events);
+    propensity(state.data(), prop.data());
+    return(prop);
+}
+
+np_array MJP::propensity_out(np_array_c state) {
+    np_array prop(num_events);
+    propensity((double*)state.data(), (double*)prop.data());
+    return(prop);
+}
+
 void MJP::update_state(double* state, unsigned event) {
     for (int i = 0; i < output_species[event].size(); i++) {
         unsigned index = output_species[event][i];
