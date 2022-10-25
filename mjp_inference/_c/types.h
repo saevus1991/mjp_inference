@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <random>
 // pybind
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -28,7 +30,8 @@ typedef Eigen::Triplet<double> triplet;
 
 // function types
 typedef double (*ArrayFun)(double*); 
-typedef void (*Transformation)(double*, double*, double*);
-typedef void (*Sampler)(double*, double*, double*, double*); 
-typedef double (*Llh)(double*, double*); 
+typedef void (*Transformation)(double, double*, double*, double*);
+typedef void (*Sampler)(double, double*, double*, double*, double*); 
+typedef double (*Llh)(double, double*, double*); 
 typedef std::function<vec (vec&)> Operator;
+typedef double (*RVSampler)(std::mt19937* rng);

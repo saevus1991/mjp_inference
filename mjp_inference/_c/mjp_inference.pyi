@@ -14,6 +14,7 @@ __all__ = [
     "MEInference",
     "MJP",
     "MasterEquation",
+    "ObservationModel",
     "Rate",
     "Simulator",
     "Species"
@@ -229,6 +230,15 @@ class MEInference(MasterEquation):
         """
         :type: typing.List[scipy.sparse.csr_matrix[numpy.float64]]
         """
+    pass
+class ObservationModel():
+    def __init__(self, transition_model: MJP, rv_list: typing.List[str], transformation_callable: tuple, sample_callable: tuple, llh_callable: tuple, transform_dim: int, obs_dim: int) -> None: ...
+    @typing.overload
+    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    @typing.overload
+    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
+    @typing.overload
+    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     pass
 class Rate():
     def __init__(self, name: str, value: float = 1) -> None: ...

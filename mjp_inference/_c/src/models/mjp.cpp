@@ -114,6 +114,14 @@ unsigned MJP::rate_index(const std::string& rate) {
     return(index);
 }
 
+mat_rm MJP::build_state_map() {
+    mat_rm state_map(num_states, num_species);
+    for (unsigned i = 0; i < num_states; i++) {
+        state_map.row(i) = ind2state(i).transpose();
+    }
+    return(state_map);
+}
+
 // main functions
 
 void MJP::hazard(double* state, double* haz) {
@@ -211,7 +219,12 @@ bool MJP::is_valid_state(std::vector<double>& state) {
     return(is_valid);
 }
 
-np_array MJP::ind2state(int ind) {
+vec MJP::ind2state(unsigned ind) {
+    std::vector<double> state = ut::lin2state<double, int>(ind, dims);
+    return(ut::vec2vec(state));
+}
+
+np_array MJP::ind2state_np(unsigned ind) {
     std::vector<double> state = ut::lin2state<double, int>(ind, dims);
     return(ut::vec2array(state));
 }
