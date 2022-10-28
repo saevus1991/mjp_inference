@@ -56,7 +56,7 @@ class ObservationModel {
     std::vector<RVSampler> rv_map;
     pybind11::tuple transformation_callable; 
     pybind11::capsule transformation_capsule;
-    Transformation transformation_fun; 
+    TransformFun transformation_fun; 
     pybind11::tuple sample_callable;
     pybind11::capsule sample_capsule;
     Sampler sample_fun;

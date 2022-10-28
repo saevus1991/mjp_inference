@@ -20,7 +20,8 @@ __all__ = [
     "Param",
     "Rate",
     "Simulator",
-    "Species"
+    "Species",
+    "Transform"
 ]
 
 
@@ -238,7 +239,12 @@ class NoiseModel():
     def __init__(self, param_list: typing.List[Param]) -> None: ...
     def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
-    def sample(self, seed: int = 1617610764) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def sample(self, seed: int = 1932334319) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    @property
+    def param_list(self) -> typing.List[str]:
+        """
+        :type: typing.List[str]
+        """
     pass
 class NormalNoise(NoiseModel):
     def __init__(self, mu: numpy.ndarray[numpy.float64, _Shape[m, 1]], sigma: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...
@@ -246,9 +252,9 @@ class NormalNoise(NoiseModel):
 class ObservationModel():
     def __init__(self, transition_model: MJP, rv_list: typing.List[str], transformation_callable: tuple, sample_callable: tuple, llh_callable: tuple, transform_dim: int, obs_dim: int) -> None: ...
     @typing.overload
-    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
-    @typing.overload
     def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
+    @typing.overload
+    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     @typing.overload
     def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     pass
@@ -335,4 +341,20 @@ class Species():
     @upper.setter
     def upper(self, arg1: int) -> None:
         pass
+    pass
+class Transform():
+    def __init__(self, name: str, transform_callable: tuple, output_dim: int = 1, grad_state_callable: tuple = (), grad_param_callable: tuple = ()) -> None: ...
+    def grad_param(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], grad_output: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def grad_state(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], grad_output: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    @property
+    def name(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def output_dim(self) -> int:
+        """
+        :type: int
+        """
     pass

@@ -8,11 +8,20 @@
 class NoiseModel {
     public:
     // constructor
+    NoiseModel() {};
     NoiseModel(const std::vector<Param>& params);
     NoiseModel(std::vector<Param>&& params);
+    ~NoiseModel() {
+        std::cout << "noise model destructor" << std::endl;
+    }
 
     // setup
     std::vector<std::string> build_param_list();
+
+    // getters
+    inline const std::vector<std::string>& get_param_list() {
+        return(param_list);
+    }
 
     // virtual function
     virtual vec sample(std::mt19937* rng) = 0;
@@ -50,6 +59,7 @@ class Normal : public NoiseModel {
 
     public:
     // constructors
+    Normal() : NoiseModel() {}
     Normal(const vec& mu, const vec& sigma);
 
     // helper functions

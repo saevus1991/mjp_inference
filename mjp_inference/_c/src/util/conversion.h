@@ -174,5 +174,14 @@ inline int state2lin(std::vector<S>& ind, std::vector<T>& dim) {
     return(res);
 }
 
+template <class FUNC>
+FUNC get_pyfunction(pybind11::tuple callable) {
+    if (callable.size() > 0 ) {
+        pybind11::capsule capsule = callable[0];
+        return(reinterpret_cast<FUNC>(capsule.get_pointer()));
+    } else {
+        return(nullptr);
+    }
+}
 
 } // end ut namespace
