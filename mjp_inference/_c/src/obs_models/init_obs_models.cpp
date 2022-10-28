@@ -37,13 +37,45 @@ void init_obs_models(pybind11::module_ &m){
         .def_property_readonly("param_list", &NoiseModel::get_param_list)
         .def("sample", static_cast<vec (NoiseModel::*)(unsigned)>(&NoiseModel::sample),
             pybind11::arg("seed") = std::random_device()())
-        .def("log_prob", &NoiseModel::log_prob, 
+        .def("log_prob", static_cast<double (NoiseModel::*)(const vec&)>(&NoiseModel::log_prob), 
             pybind11::arg("obs"))
-        .def("log_prob_grad", &NoiseModel::log_prob_grad, 
+        .def("log_prob_grad", static_cast<std::vector<vec> (NoiseModel::*)(const vec&)>(&NoiseModel::log_prob_grad), 
             pybind11::arg("obs"));
     pybind11::class_<Normal, NoiseModel>(m, "NormalNoise")
         .def(pybind11::init<const vec&, const vec&>(),
             pybind11::arg("mu"),
             pybind11::arg("sigma"));
+    pybind11::class_<ObservationModel>(m, "ObservationModel")
+        .def(pybind11::init<MJP*, const std::string&>(),
+            pybind11::arg("transition_model"),
+            pybind11::arg("noise_type"))
+        .def_property_readonly("noise_type", &ObservationModel::get_noise_type)
+        .def_property_readonly("noise_param_list", &ObservationModel::get_noise_param_list)
+        .def_property_readonly("num_param", &ObservationModel::get_num_param)
+        .def_property_readonly("param_list", &ObservationModel::get_param_list)
+        .def_property_readonly("param_map", &ObservationModel::get_param_map)
+        .def_property_readonly("param_array", &ObservationModel::get_param_array)
+        .def_property_readonly("param_parser", &ObservationModel::get_param_parser)
+        .def("build", &ObservationModel::build)
+        .def("add_param", &ObservationModel::add_param,
+            pybind11::arg("param"))
+        // .def("add_param", static_cast <void (ObservationModel::*)(const std::string&, const vec&)>(&ObservationModel::make_add_param),
+        //     pybind11::arg("name"),
+        //     pybind11::arg("value"))
+        .def("add_param", static_cast <void (ObservationModel::*)(const std::string&, double)>(&ObservationModel::make_add_param),
+            pybind11::arg("name"),
+            pybind11::arg("value"))
+        .def("add_transform", &ObservationModel::add_transform,
+            pybind11::arg("transform"))
+        .def("log_prob", &ObservationModel::log_prob,
+            pybind11::arg("time"),
+            pybind11::arg("state"),
+            pybind11::arg("param"),
+            pybind11::arg("obs"))
+        .def("sample", &ObservationModel::sample_np,
+            pybind11::arg("time"),
+            pybind11::arg("state"),
+            pybind11::arg("param"),
+            pybind11::arg("seed"));
     return;
 }

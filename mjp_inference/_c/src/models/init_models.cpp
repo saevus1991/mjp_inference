@@ -104,27 +104,5 @@ void init_models(pybind11::module_ &m){
         .def("rate_index", static_cast<unsigned (MJP::*)(const std::string& )>(&MJP::rate_index),
         pybind11::arg("rate"))
         .def("parse_clusters", &MJP::parse_clusters);
-    pybind11::class_<ObservationModel>(m, "ObservationModel")
-        .def(pybind11::init<MJP*, const std::vector<std::string>&, pybind11::tuple, pybind11::tuple, pybind11::tuple, unsigned, unsigned>(),
-            pybind11::arg("transition_model"),
-            pybind11::arg("rv_list"),
-            pybind11::arg("transformation_callable"),
-            pybind11::arg("sample_callable"),
-            pybind11::arg("llh_callable"),
-            pybind11::arg("transform_dim"),
-            pybind11::arg("obs_dim"))
-        .def("transform", &ObservationModel::transform,
-            pybind11::arg("time"),
-            pybind11::arg("state"),
-            pybind11::arg("param"))
-        .def("transform", &ObservationModel::llh,
-            pybind11::arg("time"),
-            pybind11::arg("state"),
-            pybind11::arg("param"))
-        .def("transform", &ObservationModel::sample_np,
-            pybind11::arg("time"),
-            pybind11::arg("state"),
-            pybind11::arg("param"),
-            pybind11::arg("seed"));
     return;
 }

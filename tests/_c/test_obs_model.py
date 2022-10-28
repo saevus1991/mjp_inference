@@ -1,3 +1,4 @@
+import enum
 import os
 import numpy as np
 # import torch
@@ -62,11 +63,25 @@ initial = trajectory['states'][-1]
 # preparations
 rv_list = ["gauss"]
 alpha = np.array([0, 4, 8, 12, 16, 20, 24, 24, 24, 24, 24, 24], dtype=np.float64)
-param = np.array([5.0, 3.0, 0.001, 1.1, 0.1])
+param = np.array([5.0, 3.0, 0.0001, 1.1, 15])
 time = 28.0
-print(len(alpha))
 
-def transformation(time, state, param, transformed):
+# set up up obs model
+obs_model = mjpi.ObservationModel(model, noise_type="normal")
+# register parameters
+obs_model.add_param(name='b0', value=5.0)
+obs_model.add_param(name='b1', value=3.0)
+obs_model.add_param(name='lamb', value=0.0001)
+obs_model.add_param(name='gamma', value=1.1)
+obs_model.add_param(name='sigma', value=15)
+
+print(obs_model.noise_type)
+print(obs_model.noise_param_list)
+print(obs_model.param_list)
+print(obs_model.param_parser)
+
+
+def intensity(time, state, param, transformed):
     # parse parameters
     b0 = param[0]
     b1 = param[1]
@@ -80,23 +95,36 @@ def transformation(time, state, param, transformed):
     transformed[0] = b0 + (b1 + gamma * n_stem) * np.exp(-lambd*time)
 
 
-def sample(time, transformed, param, rv, obs):
-    # parse
-    sigma = param[4]
-    noise = rv[0]
-    # sample
-    obs[0] = transformed[0] + sigma * noise
+def sigma(time, state, param, transformed):
+    transformed[0] = param[4]
 
 
-# def llh(time, transformed, param, obs)
+# add transforms to obs model
+obs_model.add_transform(mjpi.Transform('mu', intensity))
+obs_model.add_transform(mjpi.Transform('sigma', sigma))
+obs_model.build()
 
+# prepare simulation
+seed = np.random.randint(2**16)
+tspan = np.array([0.0, 200.0])
+t_obs = np.arange(tspan[0], tspan[1], 3.0)
 
-transformation_compiled = cfunc(TransformationFun)(transformation)
-transformation_callable = LowLevelCallable(transformation_compiled.ctypes)
-sample_compiled = cfunc(SampleFun)(sample)
-sample_callable = LowLevelCallable(sample_compiled.ctypes)
-# transformation_compiled(time, initial, param, res)
-print("test")
+# simulate
+simulator = mjpi.Simulator(model, initial, tspan, seed)
+states_sim = simulator.simulate(t_obs)
 
-# set up obsmodel
-# obs_model = mjpi.ObservationModel(model, rv_list, transformation_callable, sample_callble, llh_callable, transform_dim, obs_dim)
+# create observations
+obs = np.zeros(len(t_obs))
+for i, t_i in enumerate(t_obs):
+    seed = np.random.randint(2**16)
+    obs[i] = obs_model.sample(t_i, states_sim[i], param, seed)
+
+# other stats
+num_pol = states_sim.sum(axis=1)
+num_stem = (states_sim * alpha[None, :]).sum(axis=1)
+
+fig, axs = plt.subplots(3, 1)
+axs[0].plot(t_obs, num_pol, '--', color='tab:red')
+axs[1].plot(t_obs, num_stem, '--', color='tab:red')
+axs[2].plot(t_obs, obs, '--o', color='tab:red')
+plt.show()

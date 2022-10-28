@@ -11,6 +11,7 @@ sigma = 2.3*np.ones(3)
 
 # set up gauss noise
 noise_model = mjpi.NormalNoise(mu=mu, sigma=sigma)
+print("param list", noise_model.param_list)
 
 parameters = [mu, sigma]
 

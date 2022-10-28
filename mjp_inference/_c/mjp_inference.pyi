@@ -239,7 +239,7 @@ class NoiseModel():
     def __init__(self, param_list: typing.List[Param]) -> None: ...
     def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
-    def sample(self, seed: int = 1932334319) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def sample(self, seed: int = 1902174261) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     @property
     def param_list(self) -> typing.List[str]:
         """
@@ -250,13 +250,50 @@ class NormalNoise(NoiseModel):
     def __init__(self, mu: numpy.ndarray[numpy.float64, _Shape[m, 1]], sigma: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...
     pass
 class ObservationModel():
-    def __init__(self, transition_model: MJP, rv_list: typing.List[str], transformation_callable: tuple, sample_callable: tuple, llh_callable: tuple, transform_dim: int, obs_dim: int) -> None: ...
+    def __init__(self, transition_model: MJP, noise_type: str) -> None: ...
     @typing.overload
-    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
+    def add_param(self, name: str, value: float) -> None: ...
     @typing.overload
-    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
-    @typing.overload
-    def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def add_param(self, param: Param) -> None: ...
+    def add_transform(self, transform: Transform) -> None: ...
+    def build(self) -> None: ...
+    def log_prob(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
+    def sample(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    @property
+    def noise_param_list(self) -> typing.List[str]:
+        """
+        :type: typing.List[str]
+        """
+    @property
+    def noise_type(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def num_param(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def param_array(self) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]:
+        """
+        :type: numpy.ndarray[numpy.float64, _Shape[m, 1]]
+        """
+    @property
+    def param_list(self) -> typing.List[str]:
+        """
+        :type: typing.List[str]
+        """
+    @property
+    def param_map(self) -> typing.List[Param]:
+        """
+        :type: typing.List[Param]
+        """
+    @property
+    def param_parser(self) -> str:
+        """
+        :type: str
+        """
     pass
 class Param():
     def __init__(self, name: str, value: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...

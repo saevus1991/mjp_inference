@@ -2,6 +2,10 @@
 
 // constructor 
 
+NoiseModel::NoiseModel(std::vector<std::string>&& param_list_) :
+    param_list(param_list_)
+    {}
+
 NoiseModel::NoiseModel(const std::vector<Param>& params) :
     param_map(params),
     param_list(build_param_list())
@@ -9,17 +13,22 @@ NoiseModel::NoiseModel(const std::vector<Param>& params) :
 
 NoiseModel::NoiseModel(std::vector<Param>&& params) :
     param_map(params),
-    param_list(build_param_list())
+    param_list(build_param_list()),
+    param_values(build_param_values())
     {}
 
 // main functions
 
-vec NoiseModel::sample(unsigned seed) {
-    std::mt19937 rng(seed);
-    return(sample(&rng));
-}
 
 // setup
+
+std::vector<vec> NoiseModel::build_param_values() {
+    std::vector<vec> param_values;
+    for (unsigned i = 0; i < param_map.size(); i++) {
+        param_values.push_back(param_map[i].get_value());
+    }
+    return(param_values);
+}
 
 std::vector<std::string> NoiseModel::build_param_list() {
     std::vector<std::string> param_list;
@@ -31,7 +40,7 @@ std::vector<std::string> NoiseModel::build_param_list() {
 
 // *** trampoline class **
 
-vec PyNoiseModel::sample(std::mt19937* rng) {
+vec PyNoiseModel::sample(const std::vector<vec>& params, std::mt19937* rng) {
     PYBIND11_OVERRIDE_PURE(
         vec, 
         NoiseModel,      
@@ -40,21 +49,21 @@ vec PyNoiseModel::sample(std::mt19937* rng) {
     ); 
 }
 
-double PyNoiseModel::log_prob(const vec& obs) {
+double PyNoiseModel::log_prob(const std::vector<vec>& params, const vec& obs) {
     PYBIND11_OVERRIDE_PURE(
         double, 
         NoiseModel,      
         log_prob          
-        obs
+        params, obs
     ); 
 }
 
-std::vector<vec> PyNoiseModel::log_prob_grad(const vec& obs) {
+std::vector<vec> PyNoiseModel::log_prob_grad(const std::vector<vec>& params, const vec& obs) {
     PYBIND11_OVERRIDE_PURE(
         std::vector<vec>, 
         NoiseModel,      
         log_prob_grad          
-        obs
+        params, obs
     ); 
 }
 
@@ -102,10 +111,10 @@ vec Normal::standard_normal_vec(unsigned dim, std::mt19937* rng) {
 
 // main functions
 
-vec Normal::sample(std::mt19937* rng) {
+vec Normal::sample(const std::vector<vec>& params, std::mt19937* rng) {
     // parse params
-    const vec& mu = param_map[0].get_value();
-    const vec& sigma = param_map[1].get_value();
+    const vec& mu = params[0];
+    const vec& sigma = params[1];
     // create sample
     vec sample = standard_normal_vec(mu.size(), rng);
     vec obs = mu + (sigma.array() * sample.array()).matrix();
@@ -113,10 +122,10 @@ vec Normal::sample(std::mt19937* rng) {
 }
 
 
-double Normal::log_prob(const vec& obs) {
+double Normal::log_prob(const std::vector<vec>& params, const vec& obs) {
     // parse params
-    const vec& mu = param_map[0].get_value();
-    const vec& sigma = param_map[1].get_value();
+    const vec& mu = params[0];
+    const vec& sigma = params[1];
     const double* mu_ptr = mu.data();
     const double* sigma_ptr = sigma.data();
     const double* obs_ptr = obs.data();
@@ -129,10 +138,10 @@ double Normal::log_prob(const vec& obs) {
     return(llh_);
 }
 
-std::vector<vec> Normal::log_prob_grad(const vec& obs) {
+std::vector<vec> Normal::log_prob_grad(const std::vector<vec>& params, const vec& obs) {
     // parse params
-    const vec& mu = param_map[0].get_value();
-    const vec& sigma = param_map[1].get_value();
+    const vec& mu = params[0];
+    const vec& sigma = params[1];
     const double* mu_ptr = mu.data();
     const double* sigma_ptr = sigma.data();
     const double* obs_ptr = obs.data();
