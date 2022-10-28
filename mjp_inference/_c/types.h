@@ -35,3 +35,12 @@ typedef void (*Sampler)(double, double*, double*, double*, double*);
 typedef double (*Llh)(double, double*, double*); 
 typedef std::function<vec (vec&)> Operator;
 typedef double (*RVSampler)(std::mt19937* rng);
+
+// numerical constants
+
+#ifdef _WIN32
+    #define M_PI 3.14159265358979323846
+#endif
+
+constexpr double min_double = std::numeric_limits<double>::min();
+constexpr double max_double = std::numeric_limits<double>::max();

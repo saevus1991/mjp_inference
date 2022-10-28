@@ -14,7 +14,10 @@ __all__ = [
     "MEInference",
     "MJP",
     "MasterEquation",
+    "NoiseModel",
+    "NormalNoise",
     "ObservationModel",
+    "Param",
     "Rate",
     "Simulator",
     "Species"
@@ -231,6 +234,15 @@ class MEInference(MasterEquation):
         :type: typing.List[scipy.sparse.csr_matrix[numpy.float64]]
         """
     pass
+class NoiseModel():
+    def __init__(self, param_list: typing.List[Param]) -> None: ...
+    def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
+    def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
+    def sample(self, seed: int = 1617610764) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    pass
+class NormalNoise(NoiseModel):
+    def __init__(self, mu: numpy.ndarray[numpy.float64, _Shape[m, 1]], sigma: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...
+    pass
 class ObservationModel():
     def __init__(self, transition_model: MJP, rv_list: typing.List[str], transformation_callable: tuple, sample_callable: tuple, llh_callable: tuple, transform_dim: int, obs_dim: int) -> None: ...
     @typing.overload
@@ -239,6 +251,22 @@ class ObservationModel():
     def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     @typing.overload
     def transform(self, time: float, state: numpy.ndarray[numpy.float64, _Shape[m, 1]], param: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    pass
+class Param():
+    def __init__(self, name: str, value: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...
+    @property
+    def name(self) -> str:
+        """
+        :type: str
+        """
+    @name.setter
+    def name(self, arg1: str) -> None:
+        pass
+    @property
+    def value(self) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]:
+        """
+        :type: numpy.ndarray[numpy.float64, _Shape[m, 1]]
+        """
     pass
 class Rate():
     def __init__(self, name: str, value: float = 1) -> None: ...

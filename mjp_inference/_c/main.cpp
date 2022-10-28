@@ -1,8 +1,10 @@
 #include "types.h"
 #include "src/models/init_models.h"
+#include "src/obs_models/init_obs_models.h"
 #include "src/ssa/init_ssa.h"
 #include "src/me/init_me.h"
 #include "src/krylov/krylov_init.h"
+
 
 
 
@@ -12,4 +14,5 @@ PYBIND11_MODULE(mjp_inference, m) {
     init_ssa(m);
     init_me(m);
     krylov_init(m);
+    init_obs_models(m);
 } 
