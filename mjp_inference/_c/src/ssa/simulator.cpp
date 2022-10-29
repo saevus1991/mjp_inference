@@ -5,10 +5,21 @@
 Simulator::Simulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) :
     model(model_),
     initial(initial_),
+    rates(model->get_rate_array()),
     tspan(tspan_),
     rng(seed_),
     max_events(max_events_),
     max_event_handler(max_event_handler_)
+    {}
+
+Simulator::Simulator(MJP* model_in, int num_states, vec rates_in, vec tspan_in, int seed_in, int max_events_in, std::string max_event_handler_in) :
+    model(model_in),
+    initial(num_states),
+    rates(rates_in),
+    tspan(tspan_in),
+    rng(seed_in),
+    max_events(max_events_in),
+    max_event_handler(max_event_handler_in)
     {}
 
 // static functions
@@ -52,7 +63,7 @@ Trajectory Simulator::simulate() {
     // create sample path
     while (num_events < max_events && t < t_max) {
         // determine next event
-        hazard.noalias() = model->hazard(state);
+        hazard.noalias() = model->hazard(state, rates);
         std::tuple<bool, double, int> reaction_triplet = next_reaction(t, hazard);
         if (!std::get<0>(reaction_triplet)) {
             break;
@@ -102,7 +113,7 @@ np_array Simulator::simulate(np_array_c t_eval) {
     // create sample path
     while (num_events < max_events && t < t_max) {
         // determine next event
-        hazard.noalias() = model->hazard(state);
+        hazard.noalias() = model->hazard(state, rates);
         std::tuple<bool, double, int> reaction_triplet = next_reaction(t, hazard);
         if (!std::get<0>(reaction_triplet)) {
             break;
@@ -158,7 +169,7 @@ mat_rm Simulator::simulate(Eigen::Map<vec>& t_eval) {
     // create sample path
     while (num_events < max_events && t < t_max) {
         // determine next event
-        hazard.noalias() = model->hazard(state);
+        hazard.noalias() = model->hazard(state, rates);
         std::tuple<bool, double, int> reaction_triplet = next_reaction(t, hazard);
         if (!std::get<0>(reaction_triplet)) {
             break;

@@ -21,7 +21,9 @@ __all__ = [
     "Rate",
     "Simulator",
     "Species",
-    "Transform"
+    "Transform",
+    "simulate",
+    "simulate_batched"
 ]
 
 
@@ -207,6 +209,11 @@ class MJP():
         :type: numpy.ndarray[numpy.float64]
         """
     @property
+    def rate_dict(self) -> dict:
+        """
+        :type: dict
+        """
+    @property
     def rate_list(self) -> typing.List[str]:
         """
         :type: typing.List[str]
@@ -239,7 +246,7 @@ class NoiseModel():
     def __init__(self, param_list: typing.List[Param]) -> None: ...
     def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
-    def sample(self, seed: int = 1902174261) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def sample(self, seed: int = 118459497) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     @property
     def param_list(self) -> typing.List[str]:
         """
@@ -325,7 +332,7 @@ class Rate():
         """
     pass
 class Simulator():
-    def __init__(self, model: MJP, initial: numpy.ndarray[numpy.float64, _Shape[m, 1]], tspan: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> None: ...
+    def __init__(self, model: MJP, initial_state: numpy.ndarray[numpy.float64, _Shape[m, 1]], tspan: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> None: ...
     @typing.overload
     def simulate(self) -> dict: ...
     @typing.overload
@@ -394,4 +401,12 @@ class Transform():
         """
         :type: int
         """
+    pass
+@typing.overload
+def simulate(initial_state: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_eval: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
+    pass
+@typing.overload
+def simulate(initial_state: numpy.ndarray[numpy.float64], transition_model: MJP, tspan: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> dict:
+    pass
+def simulate_batched(initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_obs: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], seed: int, num_samples: int = -1, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
     pass

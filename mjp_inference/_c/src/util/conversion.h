@@ -5,6 +5,13 @@
 
 namespace ut {
 
+inline void copy_buffer(const double* in, double* out, int numel) {
+    for (int i = 0; i < numel; i++) {
+        out[i] = in[i];
+    }
+    return;
+}
+
 inline np_array vec2array(vec& x) {
     int x_size = x.rows();
     double* x_ptr = x.data();
@@ -52,8 +59,15 @@ inline np_array mat2array(T&& x) {
     return(y);
 }
 
-inline vec vec2vec(std::vector<double>& x) {
-    vec y = Eigen::Map<vec>(x.data(), x.size());
+inline vec vec2vec(const std::vector<double>& x) {
+    vec y(x.size());
+    copy_buffer(x.data(), y.data(), x.size());
+    return(y);
+}
+
+inline vec vec2vec(std::vector<double>&& x) {
+    vec y(x.size());
+    copy_buffer(x.data(), y.data(), x.size());
     return(y);
 }
 

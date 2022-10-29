@@ -103,7 +103,15 @@ class MJP {
     inline const Rate& get_rate(const std::string& rate) {
         return(get_rate(rate_index(rate)));
     }
-    inline np_array get_rate_array() {
+    inline vec get_rate_array() {
+        vec rate_array(num_rates);
+        double* rate_array_ptr = rate_array.data();
+        for (unsigned i = 0; i < num_rates; i++) {
+            rate_array_ptr[i] = rate_map[i].get_value();
+        }
+        return(rate_array);
+    }
+    inline np_array get_rate_array_np() {
         np_array rate_array(num_rates);
         double* rate_array_ptr = (double*) rate_array.data();
         for (unsigned i = 0; i < num_rates; i++) {
@@ -126,6 +134,9 @@ class MJP {
     }
     inline pybind11::dict get_event_dict() {
         return(ut::vec2pointerdict<std::string, Event>(event_list, event_map));
+    }
+    inline pybind11::dict get_rate_dict() {
+        return(ut::vec2pointerdict<std::string, Rate>(rate_list, rate_map));
     }
     inline std::vector<std::string> get_species_list() {
         return(species_list);
@@ -169,6 +180,8 @@ class MJP {
     vec hazard(vec& state);
     vec hazard(Eigen::Map<vec>& state);
     np_array hazard_out(np_array_c state);
+    void hazard(double* state, double* rates, double* haz);
+    vec hazard(vec& state, vec& rates);
     void propensity(double* state, double* prop);
     vec propensity(vec& state);
     vec propensity(Eigen::Map<vec>& state);

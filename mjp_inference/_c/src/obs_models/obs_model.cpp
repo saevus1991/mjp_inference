@@ -7,7 +7,8 @@ ObservationModel::ObservationModel(MJP* transition_model_, const std::string& no
     noise_type(noise_type_),
     noise_model(build_noise_model()),
     noise_param_list(noise_model->get_param_list()),
-    num_param(0)
+    num_param(0),
+    obs_dim(1)
     {}
 
 ObservationModel::~ObservationModel() {
@@ -47,6 +48,15 @@ void ObservationModel::build() {
     }
     // update transform map
     transform_map = transform_map_new;
+    // make param vec
+    param_array = vec(num_param);
+    for (unsigned i = 0; i < num_param; i++) {
+        param_array[i] = param_map[i].get_value()[0]; // only for 1-d params
+    }
+    // infer obs dimension
+    vec state = ut::vec2vec(transition_model->get_default_state());
+    vec obs = sample_np(0.0, state, param_array, 0);
+    obs_dim = obs.size();
 }
 
 // getters

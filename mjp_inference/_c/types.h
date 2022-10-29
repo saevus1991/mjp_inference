@@ -34,6 +34,7 @@ typedef void (*TransformFun)(double, double*, double*, double*);
 typedef void (*TransformGrad)(double, double*, double*, double*, double*);
 typedef void (*Sampler)(double, double*, double*, double*, double*); 
 typedef double (*Llh)(double, double*, double*); 
+typedef Eigen::Map<vec> (*ArrayGetter)(Eigen::Map<vec>&, int, int);
 typedef std::function<vec (vec&)> Operator;
 typedef double (*RVSampler)(std::mt19937* rng);
 

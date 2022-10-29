@@ -16,12 +16,12 @@ model.add_species(name='Protein', upper=500)
 # add events
 model.add_event(mjpi.MassAction(name='Activation', reaction='1 G0 -> 1 G1', rate=0.001))
 model.add_event(mjpi.Reaction(name='Deactivation', reaction='1 G1 -> 1 G0', rate=0.001, propensity=lambda x: x[0]))
-model.add_event(mjpi.Reaction(name='Transcription', reaction='1 G1 -> 1 G1 + 1 mRNA', rate=0.06, propensity=lambda x: x[0]))
+# model.add_event(mjpi.Reaction(name='Transcription', reaction='1 G1 -> 1 G1 + 1 mRNA', rate=0.06, propensity=lambda x: x[0]))
+model.add_event(mjpi.MassAction(name='Transcription', reaction='1 G1 -> 1 G1 + 1 mRNA', rate=0.06))
 model.add_event(mjpi.Reaction(name='mRNA Decay', reaction='1 mRNA -> 0 mRNA', rate=0.001, propensity=lambda x: x[0]))
 model.add_event(mjpi.Reaction(name='Translation', reaction='1 mRNA -> 1 mRNA + 1 Protein', rate=0.01, propensity=lambda x: x[0]))
 model.add_event(mjpi.Reaction(name='Protein Decay', reaction='1 Protein -> 0 Protein', rate=0.0009, propensity=lambda x: x[0]))
 model.build()
-# quit()
 
 # prepare simulation
 initial = model.default_state

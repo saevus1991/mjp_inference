@@ -123,5 +123,6 @@ std::vector<S> sort_by(const std::vector<S>& first, const std::vector<T>& second
     return(sorted);
 }
 
+int infer_batchsize(std::vector<pybind11::buffer_info>& buffers, const std::vector<int>& base_dims, int batchsize_ = -1);
 
 } // end namespace

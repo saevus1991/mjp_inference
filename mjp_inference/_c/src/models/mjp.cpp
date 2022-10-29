@@ -44,11 +44,12 @@ void MJP::build() {
             const std::string& rate_name = event_map[i].get_rate().get_name();
             if (std::find(rate_list.begin(), rate_list.end(), rate_name) == rate_list.end()) {
                 rate_list.push_back(rate_name);
+                rate_map.push_back(event_map[i].get_rate());
             }
         }
         num_rates = rate_list.size();
     }
-    // make rate map
+    // make event to rate map
     for (int i = 0; i < num_events; i++) {
         const std::string& rate_name = event_map[i].get_rate().get_name();
         unsigned ind = std::find(rate_list.begin(), rate_list.end(), rate_name) - rate_list.begin();
@@ -155,6 +156,29 @@ np_array MJP::hazard_out(np_array_c state) {
     np_array haz(num_events);
     hazard((double*)state.data(), (double*)haz.data());
     return(haz);
+}
+
+void MJP::hazard(double* state, double* rates, double* haz) {
+    // iterate over events
+    for (int i = 0; i < num_events; i++) {
+        // create local state
+        unsigned local_size = input_species[i].size();
+        std::vector<double> local_state(local_size);
+        for (int j = 0; j < local_size; j++) {
+            unsigned ind = input_species[i][j];
+            local_state[j] = state[ind];
+        }
+        // eval local hazard 
+        double rate = rates[event_to_rate_map[i]];
+        haz[i] = rate * event_map[i].propensity(local_state.data());
+    }
+}
+
+vec MJP::hazard(vec& state, vec& rates) {
+    vec haz(num_events);
+    hazard(state.data(), rates.data(), haz.data());
+    return(haz);
+    // return(rates(event_to_rate_map).array() * propensity(state).array()); 
 }
 
 void MJP::propensity(double* state, double* prop) {

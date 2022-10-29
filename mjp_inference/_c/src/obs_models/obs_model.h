@@ -53,12 +53,7 @@ class ObservationModel {
     inline const std::vector<std::string>& get_param_list() const {
         return(param_list);
     }
-    inline vec get_param_array() const {
-        // Note: only 1-d params supported
-        vec param_array(num_param);
-        for (unsigned i = 0; i < num_param; i++) {
-            param_array[i] = param_map[i].get_value()[0]; 
-        }
+    inline const vec& get_param_array() const {
         return(param_array);
     }
     inline const std::vector<Param>& get_param_map() const {
@@ -68,6 +63,9 @@ class ObservationModel {
         return(num_param);
     }
     std::string get_param_parser() const;
+    inline unsigned get_obs_dim() const {
+        return(obs_dim);
+    }
 
     // main functions
     inline double log_prob(double time, vec& state, vec& param, vec& obs) {
@@ -99,6 +97,8 @@ class ObservationModel {
     std::vector<Param> param_map;
     unsigned num_param;
     std::vector<Transform> transform_map;
+    vec param_array;
+    unsigned obs_dim;
     // std::vector<std::string> rv_list;
     // std::vector<RVSampler> rv_map;
     // pybind11::tuple transformation_callable; 
