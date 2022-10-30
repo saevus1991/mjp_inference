@@ -8,7 +8,9 @@ ObservationModel::ObservationModel(MJP* transition_model_, const std::string& no
     noise_model(build_noise_model()),
     noise_param_list(noise_model->get_param_list()),
     num_param(0),
-    obs_dim(1)
+    num_states(transition_model->get_num_states()),
+    obs_dim(1),
+    state_map(transition_model->build_state_map())
     {}
 
 ObservationModel::~ObservationModel() {

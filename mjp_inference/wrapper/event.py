@@ -1,6 +1,8 @@
 from typing import Callable, Any
+from xml.dom.expatbuilder import parseFragment
 from mjp_inference._c.mjp_inference import Species, Rate
 from mjp_inference._c.mjp_inference import Event as _Event
+from mjp_inference.wrapper.compile import parse_function
 import numpy as np
 import re
 import mjp_inference.util.functions as func
@@ -23,9 +25,8 @@ class Event(_Event):
             rate = Rate(name, rate)
         elif isinstance(rate, str):
             rate = Rate(rate, 1.0)
-        # parse hazard
-        propensity_compiled = cfunc(ArrayFun, nopython=True)(propensity)
-        propensity_callable = LowLevelCallable(propensity_compiled.ctypes)     
+        # parse hazard 
+        propensity_callable = parse_function(propensity, ArrayFun)   
         # call Event constructor
         _Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, propensity_callable=propensity_callable, change_vec=change_vec)
 

@@ -18,4 +18,23 @@ vec cumsum(T& x) {
     return(y);
 }
 
+template <class T>
+std::vector<unsigned> nn_project(T& state) {
+  /*
+  Set all elements below threshold to threshold and return corresponding indices
+  */
+  // preperations
+  std::vector<unsigned> indices;
+  indices.reserve(int(state.rows()));
+  double* state_ptr = (double*) state.data();
+  // iterate over components
+  for (unsigned i = 0; i < state.rows(); i++) {
+    if (state_ptr[i] < 1e-10) {
+      state_ptr[i] = 1e-10;
+      indices.push_back(i);
+    }
+  }
+  return(indices);
+}
+
 } // end ut::math namespace

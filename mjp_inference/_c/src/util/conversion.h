@@ -71,6 +71,16 @@ inline vec vec2vec(std::vector<double>&& x) {
     return(y);
 }
 
+inline std::vector<double> vec2vec(const vec& x) {
+    std::vector<double> y(x.data(), x.data()+x.size());
+    return(y);
+}
+
+inline std::vector<double> vec2vec(vec&& x) {
+    std::vector<double> y(x.data(), x.data()+x.size());
+    return(y);
+}
+
 inline np_array vec2array(std::vector<double>& x) {
     int x_size = x.size();
     np_array y(x_size);

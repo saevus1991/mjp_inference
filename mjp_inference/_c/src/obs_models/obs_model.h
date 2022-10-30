@@ -75,6 +75,18 @@ class ObservationModel {
         double llh = noise_model->log_prob(noise_params, obs);
         return(llh);
     }
+    inline vec log_prob_grad(double time, vec& state, vec& param, vec& obs) {
+        // gradients of the noise model
+        std::vector<vec> noise_params = compute_noise_params(time, state, param);
+        std::vector<vec> noise_grad = noise_model->log_prob_grad(noise_params, obs);
+        // backprop through transform
+        vec grad(param.size());
+        grad.setZero();
+        for (unsigned i = 0; i < transform_map.size(); i++) {
+            grad.noalias() += transform_map[i].grad(time, state, param, noise_grad[i]);
+        }
+        return(grad);
+    }
     inline vec sample(double time, vec& state, vec&param, std::mt19937* rng) {
         // compute noise params
         std::vector<vec> noise_params = compute_noise_params(time, state, param);
@@ -85,6 +97,23 @@ class ObservationModel {
     inline vec sample_np(double time, vec& state, vec&param, unsigned seed) {
         std::mt19937 rng(seed);
         return(sample(time, state, param, &rng));
+    }
+    // vectorized main functions
+    inline vec log_prob_vec(double time, vec& param, vec& obs) {
+        // iterate over states
+        vec llh(num_states);
+        for (int i = 0; i < num_states; i++) {
+            llh[i] = log_prob(time, state_map[i], param, obs);
+        }
+        return(llh);
+    } // #TODO: mat -> mat_rm?
+    inline mat log_prob_grad_vec(double time, vec& param, vec& obs) {
+        // iterate over states
+        mat llh_grad(num_states, param.size());
+        for (int i = 0; i < num_states; i++) {
+            llh_grad.row(i).noalias() = log_prob_grad(time, state_map[i], param, obs).transpose();
+        }
+        return(llh_grad);
     }
 
 
@@ -98,6 +127,7 @@ class ObservationModel {
     unsigned num_param;
     std::vector<Transform> transform_map;
     vec param_array;
+    unsigned num_states;
     unsigned obs_dim;
     // std::vector<std::string> rv_list;
     // std::vector<RVSampler> rv_map;
@@ -112,6 +142,6 @@ class ObservationModel {
     // Llh llh_fun;
     // unsigned transform_dim;
     // unsigned obs_dim;
-    // mat_rm state_map;
+    std::vector<vec> state_map;
 
 };

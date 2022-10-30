@@ -115,10 +115,18 @@ unsigned MJP::rate_index(const std::string& rate) {
     return(index);
 }
 
-mat_rm MJP::build_state_map() {
+mat_rm MJP::build_state_matrix() {
     mat_rm state_map(num_states, num_species);
     for (unsigned i = 0; i < num_states; i++) {
         state_map.row(i) = ind2state(i).transpose();
+    }
+    return(state_map);
+}
+
+std::vector<vec> MJP::build_state_map() {
+    std::vector<vec> state_map(num_states);
+    for (unsigned i = 0; i < num_states; i++) {
+        state_map[i] = ind2state(i);
     }
     return(state_map);
 }

@@ -24,7 +24,8 @@ class MJP {
     std::vector<unsigned> event_index(const std::vector<std::string>& event);
     std::vector<std::vector<unsigned>> parse_clusters(std::vector<std::vector<std::string>> clusters);
     unsigned rate_index(const std::string& rate);
-    mat_rm build_state_map();
+    mat_rm build_state_matrix();
+    std::vector<vec> build_state_map();
 
     // interface functions
     inline void add_species(Species species) {
