@@ -37,4 +37,16 @@ std::vector<unsigned> nn_project(T& state) {
   return(indices);
 }
 
+template <class T>
+void project_positive(T& array) {
+  // get vars
+  double* array_ptr = (double*) array.data();
+  unsigned len = array.size();
+  for (unsigned i = 0; i < len; i++) {
+    if (array_ptr[i] < min_double) {
+        array_ptr[i] = min_double;
+    }
+  }
+}
+
 } // end ut::math namespace

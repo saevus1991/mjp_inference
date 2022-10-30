@@ -42,6 +42,15 @@ class ObservationModel {
     inline void add_transform(Transform transform) {
         transform_map.push_back(transform);
     }
+    inline unsigned transform_index(const std::string& transform) {
+        auto it = std::find(noise_param_list.begin(), noise_param_list.end(), transform);
+        unsigned index = it - noise_param_list.begin();
+        if (index == noise_param_list.size()) {
+            std::string msg = "Transform \"" + transform + "\" not part of obs_model \"" ;
+            throw std::invalid_argument(msg);
+        }
+        return(index);
+    }
 
     // getters
     inline const std::string& get_noise_type() const {
@@ -98,6 +107,10 @@ class ObservationModel {
         std::mt19937 rng(seed);
         return(sample(time, state, param, &rng));
     }
+    inline vec transform(double time, vec&state, vec&param, const std::string name) {
+        unsigned ind = transform_index(name);
+        return(transform_map[ind].transform(time, state, param));
+    }
     // vectorized main functions
     inline vec log_prob_vec(double time, vec& param, vec& obs) {
         // iterate over states
@@ -115,7 +128,15 @@ class ObservationModel {
         }
         return(llh_grad);
     }
-
+    inline mat_rm transform_vec(double time, vec&param, const std::string name) {
+        unsigned ind = transform_index(name);
+        unsigned dim = transform_map[ind].get_output_dim();
+        mat_rm transformed(num_states, dim);
+        for (unsigned i = 0; i < num_states; i++) {
+            transformed.row(i).noalias() = transform_map[ind].transform(time, state_map[i], param).transpose();
+        }
+        return(transformed);
+    }
 
     private:
     MJP* transition_model;

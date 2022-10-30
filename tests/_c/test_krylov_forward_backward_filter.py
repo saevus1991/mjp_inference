@@ -1,7 +1,6 @@
 import numpy as np
 import mjp_inference as mjpi
-from mjp_inference.util.diff import num_derivative
-import time as stopwatch
+import matplotlib.pyplot as plt
 
 np.random.seed(2201251626)
 
@@ -94,6 +93,7 @@ obs_model.add_transform(mjpi.Transform('sigma', sigma, transform_grad=sigma_back
 obs_model.build()
 # get observations
 seed = np.random.randint(2**16)
+tspan = np.array([0.0, 100.0])
 t_obs = np.arange(3.0, 94.0, 3.0)
 observations = mjpi.simulate(initial, model, obs_model, t_obs, seed)
 
@@ -102,49 +102,28 @@ master_equation = mjpi.MEInference(model)
 rates = model.rate_array
 obs_param = obs_model.param_array
 
-# run filter
-start_time = stopwatch.time()
-filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial_dist, rates, obs_param)
-llh_compiled = filt.log_prob()
-filt.log_prob_backward()
-filt.compute_rates_grad()
-end_time = stopwatch.time()
-print(llh_compiled)
-print(f"Computing log prob via Krylov required {end_time-start_time} seconds")
-initial_grad = filt.get_initial_grad()
-rates_grad = filt.get_rates_grad()
-obs_param_grad = filt.get_obs_param_grad()
+# set up filter objcect
+filt = mjpi.KrylovBackwardFilter(master_equation, obs_model, t_obs, observations, initial_dist, rates, obs_param, tspan)
+filt.forward_filter()
+filt.backward_filter()
+print("log_prob", filt.log_prob())
+
+# compute forward filter
+t_eval = np.linspace(0.0, 90, 100)
+intensity_filt = np.zeros(len(t_eval))
+intensity_smooth = np.zeros(len(t_eval))
+for i, t_i in enumerate(t_eval):
+    p_i = filt.eval_forward_filter(t_i)
+    b_i = filt.eval_backward_filter(np.array([t_i]))
+    s_i = p_i.squeeze() * b_i.squeeze()
+    s_i = s_i / s_i.sum()
+    intensity_map = obs_model.transform_vec(np.array([t_i]), obs_param, 'mu').squeeze()
+    intensity_filt[i] = np.sum(intensity_map * p_i)
+    intensity_smooth[i] = np.sum(intensity_map * s_i)
 
 
-# numerical rates gradient
-def fun(x):
-    filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial_dist, x, obs_param)
-    llh = filt.log_prob()
-    return(np.array([llh]))
-rates_grad_num = num_derivative(fun, rates, 1e-5)
-print(rates_grad)
-print(rates_grad_num)
-
-ind = np.random.choice(np.arange(model.num_states), 5)
-
-# numerical initial gradient 
-def fun(x):
-    initial = initial_dist.copy()
-    initial[ind] = x
-    filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial, rates, obs_param)
-    llh = filt.log_prob()
-    return(np.array([llh]))
-initial_grad_num = num_derivative(fun, initial_dist[ind])
-print(initial_grad[ind])
-print(initial_grad_num)
-# check = np.linalg.norm(initial_grad_num-initial_grad)
-# print('initial grad check', check)
-
-# numerical obs param gradient
-def fun(x):
-    filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial_dist, rates, x)
-    llh = filt.log_prob()
-    return(np.array([llh]))
-obs_param_grad_num = num_derivative(fun, obs_param, 1e-5)
-print(obs_param_grad)
-print(obs_param_grad_num)
+# plot
+plt.plot(t_obs, observations, '-r')
+plt.plot(t_eval, intensity_filt, '-b')
+plt.plot(t_eval, intensity_smooth, '-m')
+plt.show()

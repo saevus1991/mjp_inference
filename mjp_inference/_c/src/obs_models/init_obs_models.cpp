@@ -76,6 +76,11 @@ void init_obs_models(pybind11::module_ &m){
             pybind11::arg("state"),
             pybind11::arg("param"),
             pybind11::arg("seed"))
+        .def("transform", &ObservationModel::transform,
+            pybind11::arg("time"),
+            pybind11::arg("state"),
+            pybind11::arg("param"),
+            pybind11::arg("name"))
         .def("log_prob_vec", &ObservationModel::log_prob_vec,
             pybind11::arg("time"),
             pybind11::arg("param"),
@@ -83,6 +88,10 @@ void init_obs_models(pybind11::module_ &m){
         .def("log_prob_grad_vec", &ObservationModel::log_prob_grad_vec,
             pybind11::arg("time"),
             pybind11::arg("param"),
-            pybind11::arg("obs"));
+            pybind11::arg("obs"))
+        .def("transform_vec", &ObservationModel::transform_vec,
+            pybind11::arg("time"),
+            pybind11::arg("param"),
+            pybind11::arg("name"));
     return;
 }

@@ -3,7 +3,6 @@
 #include "../util/math.h"
 #include "../models/mjp.h"
 #include "../obs_models/obs_model.h"
-// #include "../krylov/krylov_exp.h"
 #include "../krylov/krylov_propagator.h"
 #include "../me/me_inference.h"
 
