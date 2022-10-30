@@ -1,16 +1,14 @@
 import numpy as np
-from scipy.integrate import solve_ivp
-import matplotlib.pyplot as plt
-from mjp_inference.util.diff import num_derivative
+# import torch
+# from pathlib import Path
 import mjp_inference as mjpi
-from numba import cfunc, types
+# import matplotlib.pyplot as plt
+# from pymbvi.util import num_derivative
+from mjp_inference.util.diff import num_derivative
+# from transcription.autograd.transitio n import markov_transition
+import time as stopwatch
 
-TransformationFun = types.void(types.double, types.CPointer(types.double), types.CPointer(types.double), types.CPointer(types.double))
-SampleFun = types.void(types.double, types.CPointer(types.double), types.CPointer(types.double), types.CPointer(types.double), types.CPointer(types.double))
-
-np.random.seed(2103110956)
-# torch.manual_seed(2103170804)
-# torch.set_default_tensor_type(torch.DoubleTensor)
+np.random.seed(2201251626)
 
 # set up model
 num_sites = 12
@@ -42,12 +40,11 @@ model.add_event(mjpi.Event(name=f'Hop {num_sites-1}', input_species=input_specie
 model.add_event(mjpi.Event(name='Termination', input_species=[f'X_{num_sites-1}'], output_species=[f'X_{num_sites-1}'], rate='k_termin', propensity=lambda x: x[0], change_vec=[-1]))
 model.build()
 
-# get initial value
-seed = np.random.randint(2**16)
+# set up initial
 initial = np.zeros(num_sites)
-simulator = mjpi.Simulator(model, initial, np.array([0.0, 1000.0]), seed)
-trajectory = simulator.simulate()
-initial = trajectory['states'][-1]
+ind = model.state2ind(initial)
+initial_dist = np.zeros(model.num_states)
+initial_dist[ind] = 1.0
 
 # preparations
 alpha = np.array([0, 4, 8, 12, 16, 20, 24, 24, 24, 24, 24, 24], dtype=np.float64)
@@ -100,22 +97,78 @@ def sigma_backward(time, state, param, grad_output, grad):
 obs_model.add_transform(mjpi.Transform('mu', intensity, transform_grad=intensity_backward))
 obs_model.add_transform(mjpi.Transform('sigma', sigma, transform_grad=sigma_backward))
 obs_model.build()
+# get observations
+seed = np.random.randint(2**16)
+t_obs = np.arange(3.0, 94.0, 3.0)
+observations = mjpi.simulate(initial, model, obs_model, t_obs, seed)
 
-# prepare grad computation
-param = obs_model.param_array
-time = 9.0
-obs = np.array([305.2])
-# seed = np.random.randint(2**16)
-# tspan = np.array([0.0, 200.0])
-# t_obs = np.arange(tspan[0], tspan[1], 3.0)
+# set up master equation
+master_equation = mjpi.MEInference(model)
+rates = model.rate_array
+obs_param = obs_model.param_array
 
-log_prob_grad = obs_model.log_prob_grad(time, initial, param, obs)
+# run filter
+start_time = stopwatch.time()
+filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial_dist, rates, obs_param)
+llh_compiled = filt.log_prob()
+filt.log_prob_backward()
+filt.compute_rates_grad()
+end_time = stopwatch.time()
+print(llh_compiled)
+print(f"Computing log prob via Krylov required {end_time-start_time} seconds")
+initial_grad = filt.get_initial_grad()
+rates_grad = filt.get_rates_grad()
+obs_param_grad = filt.get_obs_param_grad()
 
+
+# # plt.plot(observations)
+# # plt.show()
+
+# # # propagate
+# # t_eval = np.arange(3.0, 100.0, 15.0)
+# # solver = transcription.KrylovSolver(model, initial_dist, rates, t_eval)
+# # states = solver.forward()
+# # print(states.shape, np.sum(states, axis=1))
+
+# # # compute gradients
+# # out = np.random.rand(len(t_eval), num_states)
+# # solver.backward(5, out)
+# # solver.compute_rates_grad()
+# # rates_grad = solver.get_rates_grad()
+# # initial_grad = solver.get_initial_grad()
+# # print(rates_grad)
+# # print(initial_grad.shape)
+
+
+# numerical rates gradient
 def fun(x):
-    return(np.array([obs_model.log_prob(time, initial, x, obs)]))
+    filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial_dist, x, obs_param)
+    llh = filt.log_prob()
+    return(np.array([llh]))
+rates_grad_num = num_derivative(fun, rates, 1e-5)
+print(rates_grad)
+print(rates_grad_num)
 
-log_prob_grad_num = num_derivative(fun, param)
+ind = np.random.choice(np.arange(model.num_states), 5)
 
+# numerical initial gradient 
+def fun(x):
+    initial = initial_dist.copy()
+    initial[ind] = x
+    filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial, rates, obs_param)
+    llh = filt.log_prob()
+    return(np.array([llh]))
+initial_grad_num = num_derivative(fun, initial_dist[ind])
+print(initial_grad[ind])
+print(initial_grad_num)
+# check = np.linalg.norm(initial_grad_num-initial_grad)
+# print('initial grad check', check)
 
-print(log_prob_grad)
-print(log_prob_grad_num)
+# numerical obs param gradient
+def fun(x):
+    filt = mjpi.KrylovFilter(master_equation, obs_model, t_obs, observations, initial_dist, rates, x)
+    llh = filt.log_prob()
+    return(np.array([llh]))
+obs_param_grad_num = num_derivative(fun, obs_param, 1e-5)
+print(obs_param_grad)
+print(obs_param_grad_num)

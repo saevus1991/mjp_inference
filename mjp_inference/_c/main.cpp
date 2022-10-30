@@ -3,8 +3,8 @@
 #include "src/obs_models/init_obs_models.h"
 #include "src/ssa/init_ssa.h"
 #include "src/me/init_me.h"
-#include "src/krylov/krylov_init.h"
-
+#include "src/krylov/init_krylov.h"
+#include "src/filter/init_filter.h"
 
 
 
@@ -13,6 +13,7 @@ PYBIND11_MODULE(mjp_inference, m) {
     init_models(m);
     init_ssa(m);
     init_me(m);
-    krylov_init(m);
+    init_krylov(m);
     init_obs_models(m);
+    init_filter(m);
 } 

@@ -3,4 +3,4 @@
 #include "krylov_propagator.h"
 #include "krylov_solver.h"
 
-void krylov_init(pybind11::module_& m);
+void init_krylov(pybind11::module_& m);
