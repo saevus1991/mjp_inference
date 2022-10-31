@@ -1,5 +1,4 @@
 from typing import Callable, Any
-from xml.dom.expatbuilder import parseFragment
 from mjp_inference._c.mjp_inference import Species, Rate
 from mjp_inference._c.mjp_inference import Event as _Event
 from mjp_inference.wrapper.compile import parse_function
@@ -9,7 +8,7 @@ import mjp_inference.util.functions as func
 from numba import cfunc, types
 from scipy import LowLevelCallable
 
-__all__ = ['ArrayFun', 'Event', 'Reaction', 'MassAction']
+__all__ = ['ArrayFun', 'Event', 'Reaction', 'MassAction', 'Transition']
 
 
 ArrayFun = types.double(types.CPointer(types.double))
@@ -101,3 +100,28 @@ class MassAction(Reaction):
                     prop *= falling_factorial(state[j], input_numbers[j])
             return(prop)
         return(mass_action)
+
+
+class Transition(_Event):
+
+    def __init__(self, name: str, species: list, state: list, target:list, rate: float=None):
+        input_species = species
+        output_species = species
+        change_vec = [target_i-state_i for target_i, state_i in zip(target, state)]
+        propensity = self.parse_propensity(np.array(state), rate)
+        Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, propensity=propensity, change_vec=change_vec)
+    
+    def parse_propensity(self, state, rate):
+        # create prop
+        size = len(state)
+        def propensity(x):
+            equal = True
+            for i in range(size):
+                if np.abs(x[i]-state[i]) > 1e-12:
+                    equal = False
+                    break
+            if equal:
+                return(rate)
+            else:
+                return(0.0)
+        return(propensity)
