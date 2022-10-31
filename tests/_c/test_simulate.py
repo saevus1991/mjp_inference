@@ -1,4 +1,3 @@
-import enum
 import os
 import numpy as np
 # import torch
@@ -21,7 +20,7 @@ SampleFun = types.void(types.double, types.CPointer(types.double), types.CPointe
 
 np.random.seed(2103110956)
 
-# # set up model
+# set up model
 num_sites = 12
 num_collect = 10-1
 # set up model

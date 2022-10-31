@@ -104,7 +104,7 @@ class MassAction(Reaction):
 
 class Transition(_Event):
 
-    def __init__(self, name: str, species: list, state: list, target:list, rate: float=None):
+    def __init__(self, name: str, species: list[str], state: list[int], target: list[int], rate: float=None):
         input_species = species
         output_species = species
         change_vec = [target_i-state_i for target_i, state_i in zip(target, state)]
