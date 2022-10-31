@@ -3,6 +3,7 @@
 // constructor
 
 MJP::MJP(std::string name_) : 
+    tol(1e-12),
     name(name_),
     num_species(0),
     num_events(0),
@@ -251,6 +252,18 @@ bool MJP::is_valid_state(std::vector<double>& state) {
     return(is_valid);
 }
 
+bool MJP::is_valid_state(vec& state) {
+    bool is_valid = true;
+    double* state_ptr = state.data();
+    for (int i = 0; i < num_species; i++) {
+        if ( !species_map[i].is_valid_state(int(state_ptr[i])) ) {
+            is_valid = false;
+            break; 
+        }
+    }
+    return(is_valid);
+}
+
 vec MJP::ind2state(unsigned ind) {
     std::vector<double> state = ut::lin2state<double, int>(ind, dims);
     return(ut::vec2vec(state));
@@ -261,7 +274,33 @@ np_array MJP::ind2state_np(unsigned ind) {
     return(ut::vec2array(state));
 }
 
-int MJP::state2ind(np_array state_) {
+unsigned MJP::state2ind(const vec& state_) { // #TODO: can be templated
     std::vector<double> state((double*)state_.data(), (double*)state_.data() + state_.size());
     return(ut::state2lin(state, dims));
+}
+
+unsigned MJP::state2ind_np(np_array state_) {
+    std::vector<double> state((double*)state_.data(), (double*)state_.data() + state_.size());
+    return(ut::state2lin(state, dims));
+}
+
+std::vector<int> MJP::targets(vec& state) {
+    // compute propensity
+    vec prop = propensity(state);
+    // store target indices
+    std::vector<int> targ(prop.rows());
+    for (unsigned i = 0; i < prop.rows(); i++) {
+        if ( std::abs(prop[i]) > tol ) {
+            vec target(state);
+            update_state(target, i);
+            if (is_valid_state(target)) {
+                targ[i] = state2ind(target);
+            } else {
+                targ[i] = -1;
+            }
+        } else {
+            targ[i] = -1;
+        }
+    }
+    return(targ);
 }

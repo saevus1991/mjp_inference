@@ -191,11 +191,15 @@ class MJP {
     void update_state(vec&state, unsigned event);
     np_array update_state_out(np_array_c state, unsigned event);
     bool is_valid_state(std::vector<double>& state);
+    bool is_valid_state(vec& state);
     vec ind2state(unsigned ind);
     np_array ind2state_np(unsigned ind);
-    int state2ind(np_array state);
+    unsigned state2ind(const vec& state);
+    unsigned state2ind_np(np_array state);
+    std::vector<int> targets(vec& state);
 
     private:
+    double tol;
     std::string name;
     std::vector<Species> species_map;
     std::vector<Event> event_map;

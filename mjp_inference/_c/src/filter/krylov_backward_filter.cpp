@@ -2,7 +2,8 @@
 
 
 // constructor
-KrylovBackwardFilter::KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, const vec& obs_times_in, const mat_rm& observations_in, const vec& initial_in, const vec& rates_in, const vec& obs_param_in, const vec& tspan_in) :
+
+KrylovBackwardFilter::KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, vec obs_times_in, mat_rm observations_in, vec initial_in, vec rates_in, vec obs_param_in, vec tspan_in) :
   num_steps(obs_times_in.size()),
   master_equation(master_equation_in),
   transition_model(master_equation->get_model()),
@@ -19,7 +20,7 @@ KrylovBackwardFilter::KrylovBackwardFilter(MEInference* master_equation_in, Obse
   norm(num_steps)
 { }
 
-KrylovBackwardFilter::KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, const vec& obs_times_in, const mat_rm& observations_in, const vec& initial_in, const vec& rates_in, const vec& obs_param_in) : KrylovBackwardFilter::KrylovBackwardFilter( master_equation_in, obs_model_in, obs_times_in, observations_in, initial_in, rates_in, obs_param_in, obs_times_in(std::vector<int> {0, int(obs_times_in.rows())-1}))
+KrylovBackwardFilter::KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, vec obs_times_in, mat_rm observations_in, vec initial_in, vec rates_in, vec obs_param_in) : KrylovBackwardFilter::KrylovBackwardFilter( master_equation_in, obs_model_in, obs_times_in, observations_in, initial_in, rates_in, obs_param_in, obs_times_in(std::vector<int> {0, int(obs_times_in.rows())-1}))
 {}
 
 // main functions

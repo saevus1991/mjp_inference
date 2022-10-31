@@ -15,9 +15,6 @@ class Simulator {
     Simulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
     Simulator(MJP* model_in, int num_states, vec rates_in, vec tspan_in, int seed_in, int max_events_in, std::string max_event_handler_in);
 
-    // static functions
-    static mat_rm construct_trajectory(MJP* model, const std::vector<int>& events, vec& initial);
-
     // getters
     inline std::mt19937& get_rng() {
         return(rng);

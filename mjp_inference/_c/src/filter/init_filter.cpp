@@ -18,7 +18,7 @@ void init_filter(pybind11::module_& m) {
         .def("log_prob", &KrylovFilter::log_prob)
         .def("log_prob_backward", &KrylovFilter::log_prob_backward);
     pybind11::class_<KrylovBackwardFilter>(m, "KrylovBackwardFilter")
-        .def(pybind11::init<MEInference*, ObservationModel*, const vec&, const vec&, const vec, vec&, const vec&, const vec&>(),
+        .def(pybind11::init<MEInference*, ObservationModel*, vec, vec, vec, vec, vec, vec>(),
             pybind11::arg("master_equation"),
             pybind11::arg("obs_model"),
             pybind11::arg("obs_times"),

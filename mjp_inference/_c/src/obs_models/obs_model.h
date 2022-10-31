@@ -71,10 +71,10 @@ class ObservationModel {
     inline unsigned get_num_param() const {
         return(num_param);
     }
-    std::string get_param_parser() const;
-    inline unsigned get_obs_dim() const {
+    inline unsigned get_obs_dim() {
         return(obs_dim);
     }
+    std::string get_param_parser() const;
 
     // main functions
     inline double log_prob(double time, vec& state, vec& param, vec& obs) {

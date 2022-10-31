@@ -22,28 +22,6 @@ Simulator::Simulator(MJP* model_in, int num_states, vec rates_in, vec tspan_in, 
     max_event_handler(max_event_handler_in)
     {}
 
-// static functions
-
-mat_rm Simulator::construct_trajectory(MJP* model, const std::vector<int>& events, vec& initial) {
-    // get initial state
-    int num_species = model->get_num_species();
-    mat_rm states(events.size(), num_species);
-    double *states_ptr = (double*) states.data();
-    vec state = initial;
-    double *state_ptr = state.data();
-    // fill up the trajectory by iterating over the events
-    for (unsigned i = 0; i < events.size(); i++ ) {
-        // update the state
-        int index = events[i];
-        model->update_state(state, index);
-        // append to the vector
-        for (unsigned j = 0; j < num_species; j++) {
-            states_ptr[i*num_species+j] = state_ptr[j];
-        }
-    }
-    return(states);
-}
-
 
 // main functions
 
@@ -85,7 +63,7 @@ Trajectory Simulator::simulate() {
         }
     };
     // build trajectory
-    trajectory.states = construct_trajectory(model, trajectory.events, initial);
+    trajectory.states = Trajectory::construct_trajectory(model, trajectory.events, initial);
     return(trajectory);
 }
 

@@ -90,7 +90,7 @@ void init_models(pybind11::module_ &m){
         .def("update_state", &MJP::update_state_out,
             pybind11::arg("state"),
             pybind11::arg("event"))
-        .def("state2ind", &MJP::state2ind,
+        .def("state2ind", &MJP::state2ind_np,
             pybind11::arg("state"))
         .def("ind2state", &MJP::ind2state_np,
             pybind11::arg("ind"))
@@ -104,6 +104,7 @@ void init_models(pybind11::module_ &m){
             pybind11::arg("event_list"))
         .def("rate_index", static_cast<unsigned (MJP::*)(const std::string& )>(&MJP::rate_index),
         pybind11::arg("rate"))
-        .def("parse_clusters", &MJP::parse_clusters);
+        .def("parse_clusters", &MJP::parse_clusters)
+        .def("build_state_map", &MJP::build_state_matrix);
     return;
 }

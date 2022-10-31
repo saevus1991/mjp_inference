@@ -2,6 +2,7 @@
 
 #include "../../types.h"
 #include "../util/conversion.h"
+#include "../models/mjp.h"
 
 struct Trajectory {
 
@@ -14,6 +15,9 @@ struct Trajectory {
     // constructors
     Trajectory() = default;
     Trajectory(pybind11::dict trajectory);
+
+    // static functions
+    static mat_rm construct_trajectory(MJP* model, const std::vector<int>& events, vec& initial);
 
     // helper functions
     pybind11::dict to_dict();

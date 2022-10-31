@@ -10,8 +10,8 @@
 class KrylovBackwardFilter {
 
     public:
-    KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, const vec& obs_times_in, const mat_rm& observations_in, const vec& initial_in, const vec& rates_in, const vec& obs_param_in);
-    KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, const vec& obs_times_in, const mat_rm& observations_in, const vec& initial_in, const vec& rates_in, const vec& obs_param_in, const vec& tspan);
+    KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, vec obs_times_in, mat_rm observations_in, vec initial_in, vec rates_in, vec obs_param_in);
+    KrylovBackwardFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, vec obs_times_in, mat_rm observations_in, vec initial_in, vec rates_in, vec obs_param_in, vec tspan);
 
     // main functions 
     double log_prob();

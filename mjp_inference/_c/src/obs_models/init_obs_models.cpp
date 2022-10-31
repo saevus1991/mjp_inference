@@ -46,6 +46,7 @@ void init_obs_models(pybind11::module_ &m){
         .def_property_readonly("noise_type", &ObservationModel::get_noise_type)
         .def_property_readonly("noise_param_list", &ObservationModel::get_noise_param_list)
         .def_property_readonly("num_param", &ObservationModel::get_num_param)
+        .def_property_readonly("obs_dim", &ObservationModel::get_obs_dim)
         .def_property_readonly("param_list", &ObservationModel::get_param_list)
         .def_property_readonly("param_map", &ObservationModel::get_param_map)
         .def_property_readonly("param_array", &ObservationModel::get_param_array)

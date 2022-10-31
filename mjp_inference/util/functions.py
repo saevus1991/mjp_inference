@@ -9,3 +9,12 @@ def falling_factorial(n, k):
         for i in range(int(k)):
             res *= n-i
         return(res)
+
+
+def is_equal(x, y, size):
+    equal = True
+    for i in range(size):
+        if np.abs(x[i]-y[i]) > 1e-12:
+            equal = False
+            break
+    return(equal)

@@ -49,4 +49,16 @@ void project_positive(T& array) {
   }
 }
 
+inline double solve_quadratic(double a, double b, double c) {
+    // Solve quadratix equation a*x^2+b*x+c == 0 and return the larger of the solutions (assuming one exists)
+    double sol;
+    if ( a == 0 )
+        sol = -c/b;
+    else {
+        sol = -b+std::sqrt(b*b-4*a*c);
+        sol /= 2*a;
+    }
+    return( sol );
+}
+
 } // end ut::math namespace

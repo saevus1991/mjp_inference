@@ -20,12 +20,14 @@ __all__ = [
     "NormalNoise",
     "ObservationModel",
     "Param",
+    "PosteriorSimulator",
     "Rate",
     "Simulator",
     "Species",
     "Transform",
     "simulate",
-    "simulate_batched"
+    "simulate_batched",
+    "simulate_posterior"
 ]
 
 
@@ -128,7 +130,7 @@ class KrylovSolver():
     pass
 class MasterEquation():
     def __init__(self, model: MJP) -> None: ...
-    def forward(self, arg0: float, arg1: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
+    def forward(self, time: float, prob: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
     @property
     def generator(self) -> scipy.sparse.csr_matrix[numpy.float64]:
         """
@@ -155,6 +157,7 @@ class MJP():
     @typing.overload
     def add_species(self, species: Species) -> None: ...
     def build(self) -> None: ...
+    def build_state_map(self) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
     @typing.overload
     def event_index(self, event: str) -> int: ...
     @typing.overload
@@ -276,7 +279,7 @@ class NoiseModel():
     def __init__(self, param_list: typing.List[Param]) -> None: ...
     def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
-    def sample(self, seed: int = 563451808) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def sample(self, seed: int = 414891612) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     @property
     def param_list(self) -> typing.List[str]:
         """
@@ -317,6 +320,11 @@ class ObservationModel():
         :type: int
         """
     @property
+    def obs_dim(self) -> int:
+        """
+        :type: int
+        """
+    @property
     def param_array(self) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]:
         """
         :type: numpy.ndarray[numpy.float64, _Shape[m, 1]]
@@ -352,6 +360,10 @@ class Param():
         """
         :type: numpy.ndarray[numpy.float64, _Shape[m, 1]]
         """
+    pass
+class PosteriorSimulator():
+    def __init__(self, transition_model: MJP, initial: numpy.ndarray[numpy.float64, _Shape[m, 1]], tspan: numpy.ndarray[numpy.float64, _Shape[m, 1]], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> None: ...
+    def simulate(self, t_grid: numpy.ndarray[numpy.float64], backward: numpy.ndarray[numpy.float64]) -> dict: ...
     pass
 class Rate():
     def __init__(self, name: str, value: float = 1) -> None: ...
@@ -443,4 +455,10 @@ def simulate(initial_state: numpy.ndarray[numpy.float64], transition_model: MJP,
 def simulate(initial_state: numpy.ndarray[numpy.float64], transition_model: MJP, tspan: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> dict:
     pass
 def simulate_batched(initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_obs: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], seed: int, num_samples: int = -1, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
+    pass
+@typing.overload
+def simulate_posterior(initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> list:
+    pass
+@typing.overload
+def simulate_posterior(initial_dist: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_samples: int = 1, max_events: int = 100000, max_event_handler: str = 'warning') -> object:
     pass

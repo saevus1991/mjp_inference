@@ -7,7 +7,9 @@ void init_me(pybind11::module_ &m){
             pybind11::arg("model"))
         .def_property_readonly("generator", &MasterEquation::get_generator)
         .def_property_readonly("hazard_generators", &MasterEquation::get_hazard_generators)
-        .def("forward", &MasterEquation::forward);
+        .def("forward", &MasterEquation::forward,
+            pybind11::arg("time"),
+            pybind11::arg("prob"));
     pybind11::class_<MEInference, MasterEquation>(m, "MEInference")
         .def(pybind11::init<MJP*>(),
             pybind11::arg("model"))
