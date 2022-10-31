@@ -25,6 +25,8 @@ __all__ = [
     "Simulator",
     "Species",
     "Transform",
+    "batched_filter",
+    "batched_filter_list",
     "simulate",
     "simulate_batched",
     "simulate_posterior"
@@ -279,7 +281,7 @@ class NoiseModel():
     def __init__(self, param_list: typing.List[Param]) -> None: ...
     def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
-    def sample(self, seed: int = 414891612) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def sample(self, seed: int = 856109277) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     @property
     def param_list(self) -> typing.List[str]:
         """
@@ -447,6 +449,10 @@ class Transform():
         """
         :type: int
         """
+    pass
+def batched_filter(initial: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MEInference, observation_model: ObservationModel, obs_times: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], get_gradient: bool = False, num_workers: int = -1, backend: str = 'krylov') -> tuple:
+    pass
+def batched_filter_list(initial: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MEInference, observation_model: ObservationModel, obs_times: list, observations: list, obs_param: numpy.ndarray[numpy.float64], get_gradient: bool = False, num_workers: int = -1, backend: str = 'krylov') -> tuple:
     pass
 @typing.overload
 def simulate(initial_state: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_eval: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:

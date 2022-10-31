@@ -30,3 +30,79 @@ int ut::misc::infer_batchsize(std::vector<pybind11::buffer_info>& buffers, const
     }
     return(batch_size);
 }
+
+std::vector<Eigen::Map<vec>> ut::misc::map_array(np_array_c array, int batch_size, int base_dim) {
+    // reshape if batch dim is missing
+    if (array.ndim() == base_dim) {
+        std::vector<int> shape = {1};
+        for (int i = 0; i < base_dim; i++) {
+            shape.push_back(array.shape(i));
+        }
+        array.resize(shape);
+    } else if (array.ndim() == base_dim + 1) {
+        ;
+    } else {
+        std::string msg = "Dimension mismatch during array map";
+        throw std::invalid_argument(msg);
+    }
+    // check batch size
+    if ((array.shape(0) != batch_size) && (array.shape(0) != 1) ) {
+        std::string msg = "Batch shape mismatch during array map";
+        throw std::invalid_argument(msg);
+    }
+    // map arrays
+    std::vector<Eigen::Map<vec>> vectors;
+    for (int i = 0; i < batch_size; i++) {
+        int index = (array.shape(0) == batch_size) ? i : 0;
+        np_array_c array_i = np_array_c(array[pybind11::slice(index, index+1, 1)]); 
+        vectors.push_back(Eigen::Map<vec>((double*) array_i.data(), array_i.size()));
+    }
+    return(vectors);
+}
+
+std::vector<Eigen::Map<vec>> ut::misc::map_array(np_array_c array, np_array_c map, int base_dim) {
+    // reshape if batch dim is missing
+    if (array.ndim() == base_dim) {
+        std::vector<int> shape = {1};
+        for (int i = 0; i < base_dim; i++) {
+            shape.push_back(array.shape(i));
+        }
+        array.resize(shape);
+    } else if (array.ndim() == base_dim + 1) {
+        ;
+    } else {
+        std::string msg = "Dimension mismatch during array map";
+        throw std::invalid_argument(msg);
+    }
+    // map arrays
+    int batch_size = map.size();
+    std::vector<Eigen::Map<vec>> vectors;
+    for (int i = 0; i < batch_size; i++) {
+        int index = int(map.at(i));
+        np_array_c array_i = np_array_c(array[pybind11::slice(index, index+1, 1)]); 
+        vectors.push_back(Eigen::Map<vec>((double*) array_i.data(), array_i.size()));
+    }
+    return(vectors);
+}
+
+std::vector<Eigen::Map<vec>> ut::misc::parse_array_list(pybind11::list arrays, int batch_size) {
+    // perform batch checks
+    if (batch_size == -1) {
+        batch_size = arrays.size();
+    }
+    if ((arrays.size() != batch_size) && (arrays.size() != 1) ) {
+        std::string msg = "Dimension mismatch during array list parsing";
+        throw std::invalid_argument(msg);
+    }
+    std::vector<Eigen::Map<vec>> vectors;
+    for (int i = 0; i < batch_size; i++) {
+        np_array_c array_i;
+        if (arrays.size() == batch_size) {
+            array_i = arrays[i].cast<np_array_c>();
+        } else {
+            array_i = arrays[0].cast<np_array_c>();
+        }
+        vectors.push_back(Eigen::Map<vec>((double*) array_i.data(), array_i.size()));
+    }
+    return(vectors);
+}

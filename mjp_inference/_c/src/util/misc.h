@@ -125,4 +125,8 @@ std::vector<S> sort_by(const std::vector<S>& first, const std::vector<T>& second
 
 int infer_batchsize(std::vector<pybind11::buffer_info>& buffers, const std::vector<int>& base_dims, int batchsize_ = -1);
 
+std::vector<Eigen::Map<vec>> map_array(np_array_c array, int batch_size, int base_dim);
+std::vector<Eigen::Map<vec>> map_array(np_array_c array, np_array_c map, int base_dim);
+std::vector<Eigen::Map<vec>> parse_array_list(pybind11::list arrays, int batch_size);
+
 } // end namespace
