@@ -1,4 +1,7 @@
-# import compiled version
+# import compiled code and core
 from mjp_inference._c.mjp_inference import *
-from mjp_inference.wrapper import *
+from mjp_inference.core import *
 from mjp_inference.util.conv import *
+
+# import wrappers
+import mjp_inference.wrapper.torch as mjpt

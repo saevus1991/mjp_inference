@@ -1,5 +1,5 @@
 from mjp_inference._c.mjp_inference import MJP, ObservationModel
-from mjp_inference.wrapper.transform import Transform
+from mjp_inference.core.transform import Transform
 
 
 __all__ = ['NormalObs']

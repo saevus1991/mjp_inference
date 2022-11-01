@@ -1,10 +1,9 @@
 import numpy as np
 import torch
 import mjp_inference as mjpi
-import mjp_inference.torch as mjpt
+import mjp_inference.wrapper.torch as mjpt
 from mjp_inference.util.diff import num_derivative
 from time import time as stopwatch
-
 
 torch.manual_seed(2201251626)
 torch.set_default_tensor_type(torch.DoubleTensor)

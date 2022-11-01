@@ -2,7 +2,7 @@ from typing import Callable, Any
 from mjp_inference._c.mjp_inference import Transform as _Transform
 from numba import cfunc, types
 from scipy import LowLevelCallable
-from mjp_inference.wrapper.compile import parse_function
+from mjp_inference.core.compile import parse_function
 
 
 __all__ = ['TransformFun', 'TransformGrad', 'Transform']

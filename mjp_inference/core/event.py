@@ -1,7 +1,7 @@
 from typing import Callable, Any
 from mjp_inference._c.mjp_inference import Species, Rate
 from mjp_inference._c.mjp_inference import Event as _Event
-from mjp_inference.wrapper.compile import parse_function
+from mjp_inference.core.compile import parse_function
 import numpy as np
 import re
 import mjp_inference.util.functions as func
