@@ -12,7 +12,9 @@ class MEInference : public MasterEquation {
     // helpers
     std::vector<csr_mat> build_propensity_generators();
     std::vector<csr_mat> build_param_generators();
+    csr_mat build_generator(const vec& rates);
     csr_mat build_generator();
+    void update_generator(const vec& rates);
 
     // getters
     inline const std::vector<csr_mat>& get_param_generators() {
@@ -29,6 +31,10 @@ class MEInference : public MasterEquation {
         }
         return(generator_);
     }
+
+    // main functions
+    np_array forward(double t, np_array_c prob_, np_array_c rates_);
+    np_array augmented_backward(double time, np_array_c backward_in, np_array_c forward_in, np_array_c rates_in);
 
 
     private:

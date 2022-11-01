@@ -64,11 +64,53 @@ std::vector<csr_mat> MEInference::build_param_generators() {
     return(param_generators);
 }
 
-csr_mat MEInference::build_generator() {
+csr_mat MEInference::build_generator(const vec& rates) {
     // get rates
     csr_mat generator(mjp->get_num_states(), mjp->get_num_states());
     for (unsigned i = 0; i < mjp->get_num_rates(); i++) {
-        generator = generator + mjp->get_rate(i).get_value() * param_generators[i];
+        generator = generator + rates[i] * param_generators[i];
     }
     return(generator);
+}
+
+csr_mat MEInference::build_generator() {
+    vec rates = mjp->get_rate_array();
+    return(build_generator(rates));
+} 
+
+void MEInference::update_generator(const vec& rates) {
+    generator = build_generator(rates);
+}
+
+// main functions
+
+np_array MEInference::forward(double t, np_array_c prob_, np_array_c rates_) {
+    // parse input
+    Eigen::Map<vec> prob((double*) prob_.data(), prob_.size());
+    Eigen::Map<vec> rates((double*) rates_.data(), rates_.size());
+    // set up output
+    np_array dpdt_(prob_.size());
+    Eigen::Map<vec> dpdt((double*)dpdt_.data(), dpdt_.size());
+    // compute and return
+    dpdt.noalias() = param_generators[0].transpose() * prob;
+    for (unsigned i =1; i < rates.size(); i++) {
+        dpdt.noalias() += param_generators[i].transpose() * prob;
+    }
+    return(dpdt_);
+}
+
+np_array MEInference::augmented_backward(double time, np_array_c backward_in, np_array_c forward_in, np_array_c rates_in) {
+    // parse input
+    Eigen::Map<vec> backward((double*)backward_in.data(), forward_in.size());
+    Eigen::Map<vec> forward((double*)forward_in.data(), forward_in.size());
+    // set up output
+	np_array res_out = np_array(backward_in.size());
+	Eigen::Map<vec> dydt((double*)res_out.data(), forward_in.size()); 
+    Eigen::Map<vec> rates_grad((double*)res_out.data()+forward_in.size(), rates_in.size());
+    // copute output
+    dydt.noalias() = -generator * backward;
+    for (int i = 0; i < rates_in.size(); i++) {
+        rates_grad[i] = forward.dot(param_generators[i] * backward);
+    }
+    return(res_out);
 }

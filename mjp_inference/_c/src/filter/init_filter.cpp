@@ -44,7 +44,7 @@ void init_filter(pybind11::module_& m) {
             pybind11::arg("time"))
         .def("get_initial_smoothed", &KrylovBackwardFilter::get_smoothed_initial);
     m.def("batched_filter", &batched_filter,
-        pybind11::arg("initial"),
+        pybind11::arg("initial_dist"),
         pybind11::arg("rates"),
         pybind11::arg("transition_model"),
         pybind11::arg("observation_model"),
@@ -55,7 +55,7 @@ void init_filter(pybind11::module_& m) {
         pybind11::arg("num_workers") = -1,
         pybind11::arg("backend") = "krylov");
     m.def("batched_filter_list", &batched_filter_list,
-        pybind11::arg("initial"),
+        pybind11::arg("initial_dist"),
         pybind11::arg("rates"),
         pybind11::arg("transition_model"),
         pybind11::arg("observation_model"),
