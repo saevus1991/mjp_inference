@@ -23,6 +23,8 @@ NoiseModel* ObservationModel::build_noise_model() {
     NoiseModel* noise_model;
     if (noise_type == "normal") {
         noise_model = new Normal();
+    } else if (noise_type == "lognormal") {
+        noise_model = new LogNormal();
     } else {
         std::string msg = "Noise type " + noise_type + " not yet supported";
         throw std::invalid_argument(msg);

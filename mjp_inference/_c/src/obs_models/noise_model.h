@@ -82,3 +82,18 @@ class Normal : public NoiseModel {
     double log_prob(const std::vector<vec>& params, const vec& obs) override;
     std::vector<vec> log_prob_grad(const std::vector<vec>& params, const vec& obs) override;
 };
+
+// logormal #TODO: realize this via a transform of the normal model
+
+class LogNormal : public Normal {
+
+    public:
+    // constructors
+    LogNormal() : Normal() {}
+    LogNormal(const vec& mu, const vec& sigma) : Normal(mu, sigma) {}
+
+    // main functions
+    vec sample(const std::vector<vec>& params, std::mt19937* rng) override;
+    double log_prob(const std::vector<vec>& params, const vec& obs) override;
+    std::vector<vec> log_prob_grad(const std::vector<vec>& params, const vec& obs) override;
+};

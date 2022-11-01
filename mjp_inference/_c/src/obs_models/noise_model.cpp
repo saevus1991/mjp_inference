@@ -157,8 +157,60 @@ std::vector<vec> Normal::log_prob_grad(const std::vector<vec>& params, const vec
     double* grad_sigma_ptr = gradients[1].data();
     for (unsigned i = 0; i < sigma.size(); i++) {
         double tmp =  (obs_ptr[i]-mu_ptr[i]) / sigma_ptr[i];
-        // grad_sigma_ptr[i] = (tmp*tmp - 1.0) / sigma_ptr[i];
-        grad_sigma_ptr[i] = std::pow(obs_ptr[i]-mu_ptr[i], 2) / std::pow(sigma_ptr[i], 3) - 1.0 / sigma_ptr[i];
+        grad_sigma_ptr[i] = (tmp*tmp - 1.0) / sigma_ptr[i];
+        // grad_sigma_ptr[i] = std::pow(obs_ptr[i]-mu_ptr[i], 2) / std::pow(sigma_ptr[i], 3) - 1.0 / sigma_ptr[i];
+    }
+    return(gradients);
+}
+
+// *** lognormal obs ***
+
+vec LogNormal::sample(const std::vector<vec>& params, std::mt19937* rng) {
+    // parse params
+    const vec& mu = params[0];
+    const vec& sigma = params[1];
+    // create sample
+    vec sample = standard_normal_vec(mu.size(), rng);
+    vec obs = (mu.array() * (sigma.array() * sample.array()).exp()).matrix();
+    return(obs);
+}
+
+double LogNormal::log_prob(const std::vector<vec>& params, const vec& obs) {
+    // parse params
+    const vec& mu = params[0];
+    const vec& sigma = params[1];
+    const double* mu_ptr = mu.data();
+    const double* sigma_ptr = sigma.data();
+    const double* obs_ptr = obs.data();
+    // calculate llh
+    double llh_ = -0.5 * mu.size() * std::log(2*M_PI);
+    for (unsigned i = 0; i < mu.size(); i ++) {
+        double tmp = (std::log(obs_ptr[i]) - std::log(mu_ptr[i])) / sigma_ptr[i] ;
+        llh_ += -0.5*tmp*tmp - std::log(sigma_ptr[i]) - std::log(obs_ptr[i]);
+    }
+    return(llh_);
+}
+
+std::vector<vec> LogNormal::log_prob_grad(const std::vector<vec>& params, const vec& obs) {
+    // parse params
+    const vec& mu = params[0];
+    const vec& sigma = params[1];
+    const double* mu_ptr = mu.data();
+    const double* sigma_ptr = sigma.data();
+    const double* obs_ptr = obs.data();
+    std::vector<vec> gradients(2);
+    // compute mu gradient
+    gradients[0] = vec(mu.size());
+    double* grad_mu_ptr = gradients[0].data();
+    for (unsigned i = 0; i < mu.size(); i++) {
+        grad_mu_ptr[i] = -(mu_ptr[i] - obs_ptr[i]) / ( mu_ptr[i] * sigma_ptr[i] * sigma_ptr[i]);
+    }
+    // compute sigma gradient
+    gradients[1] = vec(sigma.size());
+    double* grad_sigma_ptr = gradients[1].data();
+    for (unsigned i = 0; i < sigma.size(); i++) {
+        double tmp =  (std::log(obs_ptr[i])-std::log(mu_ptr[i])) / sigma_ptr[i];
+        grad_sigma_ptr[i] = (tmp*tmp - 1.0) / sigma_ptr[i];
     }
     return(gradients);
 }

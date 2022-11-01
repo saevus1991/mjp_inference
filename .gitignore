@@ -5,6 +5,7 @@
 # python
 *.pyd
 *.pyc
+*.so
 
 # c++
 **\build

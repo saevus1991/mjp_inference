@@ -39,6 +39,10 @@ void init_obs_models(pybind11::module_ &m){
         .def(pybind11::init<const vec&, const vec&>(),
             pybind11::arg("mu"),
             pybind11::arg("sigma"));
+        pybind11::class_<LogNormal, Normal>(m, "LogNormalNoise")
+        .def(pybind11::init<const vec&, const vec&>(),
+            pybind11::arg("exp_mu"),
+            pybind11::arg("sigma"));
     pybind11::class_<ObservationModel>(m, "ObservationModel")
         .def(pybind11::init<MJP*, const std::string&>(),
             pybind11::arg("transition_model"),
