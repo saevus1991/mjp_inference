@@ -21,7 +21,8 @@ np_array simulate(MJP* transition_model, np_array_c initial_in, np_array_c t_eva
 // simulate full trajectory 
 
 inline Trajectory simulate_full(MJP* transition_model, const Eigen::Map<vec>& initial, const Eigen::Map<vec>& rates, const Eigen::Map<vec>& tspan, int seed, int max_events, std::string max_event_handler) {
-    Simulator simulator(transition_model, initial, rates, tspan, seed, max_events, max_event_handler);
+    std::mt19937 rng(seed);
+    Simulator simulator(transition_model, initial, rates, tspan, &rng, max_events, max_event_handler);
     return(simulator.simulate());
 }
 

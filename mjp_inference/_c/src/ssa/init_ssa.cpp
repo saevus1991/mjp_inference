@@ -2,7 +2,7 @@
 
 
 void init_ssa(pybind11::module_ &m){
-    pybind11::class_<Simulator>(m, "Simulator")
+    pybind11::class_<PySimulator>(m, "Simulator")
         .def(pybind11::init<MJP*, vec, vec, int, int, std::string>(),
             pybind11::arg("model"),
             pybind11::arg("initial_state"),
@@ -10,10 +10,10 @@ void init_ssa(pybind11::module_ &m){
             pybind11::arg("seed"),
             pybind11::arg("max_events") = 100000,
             pybind11::arg("max_event_handler") = "warning")
-        .def("simulate", &Simulator::simulate_py)
-        .def("simulate", static_cast<np_array (Simulator::*)(np_array_c)>(&Simulator::simulate),
+        .def("simulate", &PySimulator::simulate_py)
+        .def("simulate", static_cast<np_array (PySimulator::*)(np_array_c)>(&PySimulator::simulate),
             pybind11::arg("t_eval"));    
-    pybind11::class_<PosteriorSimulator>(m, "PosteriorSimulator")
+    pybind11::class_<PyPosteriorSimulator>(m, "PosteriorSimulator")
         .def(pybind11::init<MJP*, const vec&, const vec&, int, int, const std::string&>(),
             pybind11::arg("transition_model"),
             pybind11::arg("initial"),
@@ -21,7 +21,7 @@ void init_ssa(pybind11::module_ &m){
             pybind11::arg("seed"),
             pybind11::arg("max_events") = 100000,
             pybind11::arg("max_event_handler") = "warning")
-        .def("simulate", static_cast<pybind11::dict (PosteriorSimulator::*)(np_array_c, np_array_c)>(&PosteriorSimulator::simulate),
+        .def("simulate", static_cast<pybind11::dict (PyPosteriorSimulator::*)(np_array_c, np_array_c)>(&PyPosteriorSimulator::simulate),
             pybind11::arg("t_grid"),
             pybind11::arg("backward")); 
     m.def("simulate", static_cast<np_array (*)(MJP*, ObservationModel*, np_array_c, np_array_c, np_array_c, np_array_c, int, int, std::string)>(&simulate),

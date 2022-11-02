@@ -14,9 +14,9 @@ class PosteriorSimulator {
     public:
 
     // constructor
-    PosteriorSimulator(MJP* model_in, const vec& initial_in, const vec& tspan_in, int seed_in, int max_events_in, const std::string& max_event_handler_in);
-    PosteriorSimulator(MJP* model_in, int num_states, const vec& rates_in, const vec& tspan_in, int seed_in, int max_events_in, const std::string& max_event_handler_in);
-    // Simulator(TransitionModel& model_in, vec tspan_in);
+    PosteriorSimulator(MJP* model_, vec initial_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_);
+    PosteriorSimulator(MJP* model_, int num_states, vec rates_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_);
+    PosteriorSimulator(MJP* model_, vec initial_, vec rates_in, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_);
 
     // setter
     inline void set_initial(vec& initial_in) {
@@ -24,7 +24,7 @@ class PosteriorSimulator {
     }
 
     // getter
-    inline std::mt19937& get_rng() {
+    inline std::mt19937* get_rng() {
         return(rng);
     }
 
@@ -41,17 +41,25 @@ class PosteriorSimulator {
     vec get_control(vec& state, vec& backward);
     vec get_control(int ind, std::vector<int>& targets, vec& backward);
 
-    private:
+    protected:
 
     MJP* model;
     vec initial;
     vec rates;
-    int seed;
     int max_events;
     std::string max_event_handler;
     vec tspan;
-    std::mt19937 rng;
+    std::mt19937* rng;
     std::uniform_real_distribution<double> U;
     int t_index;
 
+};
+
+class PyPosteriorSimulator : public PosteriorSimulator {
+    public:
+    PyPosteriorSimulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
+    PyPosteriorSimulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
+
+    protected:
+    std::mt19937 rng_raw;
 };

@@ -2,35 +2,36 @@
 
 // constructor
 
-Simulator::Simulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) :
+Simulator::Simulator(MJP* model_, vec initial_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_) :
     model(model_),
     initial(initial_),
     rates(model->get_rate_array()),
     tspan(tspan_),
-    rng(seed_),
+    rng(rng_),
     max_events(max_events_),
     max_event_handler(max_event_handler_)
     {}
 
-Simulator::Simulator(MJP* model_in, int num_states, vec rates_in, vec tspan_in, int seed_in, int max_events_in, std::string max_event_handler_in) :
-    model(model_in),
+Simulator::Simulator(MJP* model_, int num_states, vec rates_, vec tspan_, std::mt19937* rng_, int max_events_in, std::string max_event_handler_) :
+    model(model_),
     initial(num_states),
-    rates(rates_in),
-    tspan(tspan_in),
-    rng(seed_in),
+    rates(rates_),
+    tspan(tspan_),
+    rng(rng_),
     max_events(max_events_in),
-    max_event_handler(max_event_handler_in)
+    max_event_handler(max_event_handler_)
     {}
 
-Simulator::Simulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) :
+Simulator::Simulator(MJP* model_, vec initial_, vec rates_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_) :
     model(model_),
     initial(initial_),
     rates(rates_),
     tspan(tspan_),
-    rng(seed_),
+    rng(rng_),
     max_events(max_events_),
     max_event_handler(max_event_handler_)
     {}
+
 
 // main functions
 
@@ -200,8 +201,8 @@ std::tuple<bool, double, int> Simulator::next_reaction(double time, vec& hazard)
     vec cum_hazard = ut::math::cumsum(hazard);
     double total_hazard = cum_hazard(Eigen::last);
     // create random numbers
-    double rand_2 = U(rng);
-    double rand_1 = U(rng);
+    double rand_2 = U(*rng);
+    double rand_1 = U(*rng);
     // check if reaction happens
     int index = 0;
     bool fired = false;
@@ -224,3 +225,13 @@ std::tuple<bool, double, int> Simulator::next_reaction(double time, vec& hazard)
 // #TODO: add a post simulation discretization
 // #TODO: add parallel simulator
 // #TODO: add posterior simulator
+
+// *** wrapper class *** 
+
+PySimulator::PySimulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) :
+    Simulator(model_, initial_, rates_, tspan_, nullptr, max_events_, max_event_handler_),
+    rng_raw(seed_) {
+        rng = &rng_raw;
+    }
+
+PySimulator::PySimulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) : PySimulator(model_, initial_, model_->get_rate_array(), tspan_, seed_, max_events_, max_event_handler_) {}

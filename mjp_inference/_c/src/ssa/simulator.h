@@ -12,12 +12,12 @@ class Simulator {
     public:
 
     // constructor
-    Simulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
-    Simulator(MJP* model_, int num_states, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
-    Simulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
+    Simulator(MJP* model_, vec initial_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_);
+    Simulator(MJP* model_, int num_states, vec rates_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_);
+    Simulator(MJP* model_, vec initial_, vec rates_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_);
 
     // getters
-    inline std::mt19937& get_rng() {
+    inline std::mt19937* get_rng() {
         return(rng);
     }
     // setters
@@ -33,15 +33,23 @@ class Simulator {
     std::tuple<bool, double, int> next_reaction(double time, vec& hazard);
 
 
-    private:
+    protected:
     MJP* model;
     vec initial;
     vec rates;
-    int seed;
     int max_events;
     std::string max_event_handler;
     vec tspan;
-    std::mt19937 rng; // #TODO: make simulate store pointer to rng
+    std::mt19937* rng;
     std::uniform_real_distribution<double> U;
 
+};
+
+class PySimulator : public Simulator {
+    public:
+    PySimulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
+    PySimulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
+
+    protected:
+    std::mt19937 rng_raw;
 };

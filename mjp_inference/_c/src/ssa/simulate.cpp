@@ -2,16 +2,17 @@
 
 
 mat_rm simulate(MJP* transition_model, ObservationModel* obs_model, const Eigen::Map<vec>& initial, const Eigen::Map<vec>& rates, const Eigen::Map<vec>& obs_param, const Eigen::Map<vec>& t_eval, int seed, int max_events, std::string max_event_handler) {
+    // set up rng
+    std::mt19937 rng(seed);
     // simulate states
     vec tspan = t_eval(std::vector<int>{0, int(t_eval.rows())-1});
-    Simulator simulator(transition_model, initial, rates, tspan, seed, max_events, max_event_handler);
+    Simulator simulator(transition_model, initial, rates, tspan, &rng, max_events, max_event_handler);
     mat_rm states = simulator.simulate(t_eval);
     // create observations
     if (obs_model != nullptr) {
         // preparations
         unsigned num_steps = t_eval.size();
         unsigned obs_dim = obs_model->get_obs_dim();
-        std::mt19937& rng = simulator.get_rng();
         vec obs_param_ = obs_param; // #TODO: use const double in obs->sample, then this extra step can be removed
         // create output
         mat_rm obs(num_steps, obs_dim);
@@ -153,12 +154,13 @@ np_array simulate_batched(MJP* transition_model, ObservationModel* obs_model, np
     // perform computations
     #pragma omp parallel for
     for (int i = 0; i < batch_size; i++) {
+        // set up rng
+        std::mt19937 rng(seed+i);
         // create local copies
         vec rates_i = get_rates(rates, i, num_rates);
         vec obs_param_i = get_obs_param(obs_param, i, num_obs_param);
         // set up simulator
-        Simulator simulator(transition_model, transition_model->get_num_species(), rates_i, tspan, seed+i, max_events, max_event_handler);
-        std::mt19937& rng = simulator.get_rng();
+        Simulator simulator(transition_model, transition_model->get_num_species(), rates_i, tspan, &rng, max_events, max_event_handler);
         // draw initial
         std::vector<double> initial_dist_std(num_states);
         Eigen::Map<vec> initial_dist_i(initial_dist_std.data(), initial_dist_std.size());
@@ -230,10 +232,11 @@ pybind11::object simulate_posterior(MJP* transition_model, ObservationModel* obs
     std::vector<double> initial_smoothed_std(initial_dist.rows());
     Eigen::Map<vec> initial_smoothed(initial_smoothed_std.data(), initial_smoothed_std.size());
     initial_smoothed.noalias() = filt.get_smoothed_initial();
+    // get generator
+    std::mt19937 rng(seed);
     // simulate trajectory
     vec initial(transition_model->get_num_species());
-    PosteriorSimulator simulator(transition_model, initial, tspan, seed, max_events, max_event_handler);
-    std::mt19937& rng = simulator.get_rng();
+    PosteriorSimulator simulator(transition_model, initial, tspan, &rng, max_events, max_event_handler);
     std::discrete_distribution<int> dist(initial_smoothed_std.begin(), initial_smoothed_std.end());
     if (num_samples == 1) {
         initial = transition_model->ind2state(dist(rng));
@@ -346,9 +349,10 @@ pybind11::list simulate_posterior_batched(MJP* transition_model, ObservationMode
         std::vector<double> initial_smoothed_std(num_states);
         Eigen::Map<vec> initial_smoothed(initial_smoothed_std.data(), initial_smoothed_std.size());
         initial_smoothed.noalias() = filt.get_smoothed_initial();
+        // get generator
+        std::mt19937 rng(seed+i);
         // set up simulator
-        PosteriorSimulator simulator(transition_model, transition_model->get_num_species(), rates_i, tspan, seed+i, max_events, max_event_handler);
-        std::mt19937& rng = simulator.get_rng();
+        PosteriorSimulator simulator(transition_model, transition_model->get_num_species(), rates_i, tspan, &rng, max_events, max_event_handler);
         // draw initial
         std::discrete_distribution<int> dist(initial_smoothed_std.begin(), initial_smoothed_std.end());
         vec initial_i = transition_model->ind2state(dist(rng));

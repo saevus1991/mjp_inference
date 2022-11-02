@@ -1,23 +1,34 @@
 #include "posterior_simulator.h"
 
-PosteriorSimulator::PosteriorSimulator(MJP* model_in, const vec& initial_in, const vec& tspan_in, int seed_in, int max_events_in, const std::string& max_event_handler_in) :
-    model(model_in),
-    initial(initial_in),
+PosteriorSimulator::PosteriorSimulator(MJP* model_, vec initial_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_) :
+    model(model_),
+    initial(initial_),
     rates(model->get_rate_array()),
-    tspan(tspan_in),
-    rng(seed_in),
-    max_events(max_events_in),
-    max_event_handler(max_event_handler_in)
+    tspan(tspan_),
+    rng(rng_),
+    max_events(max_events_),
+    max_event_handler(max_event_handler_)
     {}
 
-PosteriorSimulator::PosteriorSimulator(MJP* model_in, int num_states, const vec& rates_in, const vec& tspan_in, int seed_in, int max_events_in, const std::string& max_event_handler_in) :
-    model(model_in),
+PosteriorSimulator::PosteriorSimulator(MJP* model_, int num_states, vec rates_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_) :
+    model(model_),
     initial(num_states),
-    rates(rates_in),
-    tspan(tspan_in),
-    rng(seed_in),
-    max_events(max_events_in),
-    max_event_handler(max_event_handler_in)
+    rates(rates_),
+    tspan(tspan_),
+    rng(rng_),
+    max_events(max_events_),
+    max_event_handler(max_event_handler_)
+    {}
+
+
+PosteriorSimulator::PosteriorSimulator(MJP* model_, vec initial_, vec rates_, vec tspan_, std::mt19937* rng_, int max_events_, std::string max_event_handler_) :
+    model(model_),
+    initial(initial_),
+    rates(rates_),
+    tspan(tspan_),
+    rng(rng_),
+    max_events(max_events_),
+    max_event_handler(max_event_handler_)
     {}
 
 
@@ -41,7 +52,7 @@ Trajectory PosteriorSimulator::simulate(S& t_grid, T& backward) {
     std::vector<double> stats(model->get_num_events());
     // initialize the internal times
     for (unsigned i = 0; i < model->get_num_events(); i++) {
-        internal_time[i] = -std::log(U(rng));
+        internal_time[i] = -std::log(U(*rng));
     }
     // create sample path
     while (num_events < max_events && t < t_max) {
@@ -59,7 +70,7 @@ Trajectory PosteriorSimulator::simulate(S& t_grid, T& backward) {
         trajectory.time.push_back(t);
         num_events++;
         // update internal time for the reaction that fired
-        internal_time[std::get<2>(reaction_triplet)] += -std::log(U(rng));
+        internal_time[std::get<2>(reaction_triplet)] += -std::log(U(*rng));
     }
     if (num_events >= max_events) {
         if (max_event_handler == "warning") 
@@ -105,7 +116,7 @@ Trajectory PosteriorSimulator::simulate(Eigen::Map<vec>& t_grid, KrylovBackwardF
     std::vector<double> stats(model->get_num_events());
     // initialize the internal times
     for (unsigned i = 0; i < model->get_num_events(); i++) {
-        internal_time[i] = -std::log(U(rng));
+        internal_time[i] = -std::log(U(*rng));
     }
     // create sample path
     while (num_events < max_events && t < t_max) {
@@ -123,7 +134,7 @@ Trajectory PosteriorSimulator::simulate(Eigen::Map<vec>& t_grid, KrylovBackwardF
         trajectory.time.push_back(t);
         num_events++;
         // update internal time for the reaction that fired
-        internal_time[std::get<2>(reaction_triplet)] += -std::log(U(rng));
+        internal_time[std::get<2>(reaction_triplet)] += -std::log(U(*rng));
     }
     if (num_events >= max_events) {
         if (max_event_handler == "warning") 
@@ -414,3 +425,14 @@ vec PosteriorSimulator::get_control(int ind, std::vector<int>& targets, vec& bac
     }
     return(control);
 }
+
+// *** wrapper class *** 
+
+PyPosteriorSimulator::PyPosteriorSimulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) :
+    PosteriorSimulator(model_, initial_, rates_, tspan_, nullptr, max_events_, max_event_handler_),
+    rng_raw(seed_) 
+    {
+        rng = &rng_raw;
+    }
+
+PyPosteriorSimulator::PyPosteriorSimulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) : PyPosteriorSimulator(model_, initial_, model_->get_rate_array(), tspan_, seed_, max_events_, max_event_handler_) {}
