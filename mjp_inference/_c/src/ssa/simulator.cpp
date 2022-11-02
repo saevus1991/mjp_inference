@@ -22,6 +22,15 @@ Simulator::Simulator(MJP* model_in, int num_states, vec rates_in, vec tspan_in, 
     max_event_handler(max_event_handler_in)
     {}
 
+Simulator::Simulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_) :
+    model(model_),
+    initial(initial_),
+    rates(rates_),
+    tspan(tspan_),
+    rng(seed_),
+    max_events(max_events_),
+    max_event_handler(max_event_handler_)
+    {}
 
 // main functions
 
@@ -129,9 +138,9 @@ np_array Simulator::simulate(np_array_c t_eval) {
 }
 
 
-mat_rm Simulator::simulate(Eigen::Map<vec>& t_eval) {
+mat_rm Simulator::simulate(const Eigen::Map<vec>& t_eval) {
     // preprations
-    double* t_eval_ptr = t_eval.data();
+    const double* t_eval_ptr = t_eval.data();
     int num_steps = t_eval.size();
     int num_species = model->get_num_species();
     double t = tspan[0];

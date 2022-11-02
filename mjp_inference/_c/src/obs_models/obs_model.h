@@ -65,6 +65,9 @@ class ObservationModel {
     inline const vec& get_param_array() const {
         return(param_array);
     }
+    inline np_array get_param_array_np() const {
+        return(ut::vec2array(param_array));
+    }
     inline const std::vector<Param>& get_param_map() const {
         return(param_map);
     }

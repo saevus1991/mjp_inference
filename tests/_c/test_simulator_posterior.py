@@ -2,6 +2,8 @@ import numpy as np
 import mjp_inference as mjpi
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+
+from mjp_inference._c.mjp_inference import MEInference
 # import torch
 # from transcription.compiled import transcription
 # from transcription.simulation.models.collecting_tasep import CollectingTASEP
@@ -170,12 +172,13 @@ pol_post = np.zeros((num_samples, len(t_post)))
 stem_post = np.zeros((num_samples, len(t_post)))
 intensity_post = np.zeros((num_samples, len(t_post)))
 seed = np.random.randint(2**16)
-trajectories = mjpi.simulate_posterior(initial_dist, model, obs_model, t_obs, observations, tspan, t_post, seed, num_samples=num_samples)
+trajectories = mjpi.simulate_posterior(model, obs_model, initial_dist, t_obs, observations, tspan, t_post, seed, num_samples=num_samples)
 for i, trajectory in enumerate(trajectories):
     states_post[i] = mjpi.discretize_trajectory(trajectory, t_post)
     pol_post[i] = states_post[i, :, :].sum(axis=1)
     stem_post[i] = states_post[i]@alpha
-    # intensity_post[i] = obs_model.transform(states_post[i], t_post, obs_param)
+    for j in range(len(t_post)):
+        intensity_post[i, j] = obs_model.transform(t_post[j], states_post[i][j], obs_param, 'mu')
 
 # sampled posterior means
 # states_post_mean = np.mean(states_smooth, axis=0)

@@ -109,7 +109,7 @@ rates = model.rate_array
 obs_param = obs_model.param_array
 
 # simulate
-obs = mjpi.simulate_batched(initial_dist, rates, model, obs_model, t_obs, obs_param, tspan, seed, num_samples=50)
+obs = mjpi.simulate_batched(model, obs_model, initial_dist, rates, obs_param, t_obs, seed, num_samples=50)
 
 print(obs.shape)
 

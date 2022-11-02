@@ -1,5 +1,4 @@
 # import compiled code and core
-from mjp_inference._c.mjp_inference import *
 from mjp_inference.core import *
 from mjp_inference.util.conv import *
 

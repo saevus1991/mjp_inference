@@ -13,7 +13,8 @@ class Simulator {
 
     // constructor
     Simulator(MJP* model_, vec initial_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
-    Simulator(MJP* model_in, int num_states, vec rates_in, vec tspan_in, int seed_in, int max_events_in, std::string max_event_handler_in);
+    Simulator(MJP* model_, int num_states, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
+    Simulator(MJP* model_, vec initial_, vec rates_, vec tspan_, int seed_, int max_events_, std::string max_event_handler_);
 
     // getters
     inline std::mt19937& get_rng() {
@@ -28,7 +29,7 @@ class Simulator {
     Trajectory simulate();
     pybind11::dict simulate_py();
     np_array simulate(np_array_c t_eval);
-    mat_rm simulate(Eigen::Map<vec>& t_eval);
+    mat_rm simulate(const Eigen::Map<vec>& t_eval);
     std::tuple<bool, double, int> next_reaction(double time, vec& hazard);
 
 
@@ -40,7 +41,7 @@ class Simulator {
     int max_events;
     std::string max_event_handler;
     vec tspan;
-    std::mt19937 rng;
+    std::mt19937 rng; // #TODO: make simulate store pointer to rng
     std::uniform_real_distribution<double> U;
 
 };

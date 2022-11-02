@@ -95,7 +95,7 @@ obs_model.build()
 seed = np.random.randint(2**16)
 tspan = np.array([0.0, 100.0])
 t_obs = np.arange(3.0, 94.0, 3.0)
-observations = mjpi.simulate(initial, model, obs_model, t_obs, seed)
+observations = mjpi.simulate(model, obs_model, initial, t_obs, seed)
 
 # set up master equation
 master_equation = mjpi.MEInference(model)

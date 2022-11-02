@@ -1,7 +1,6 @@
 import mjp_inference as mjpi
 import numpy as np
 import matplotlib.pyplot as plt
-from mjp_inference.util.conv import discretize_trajectory
 
 np.random.seed(2210311119)
 
@@ -20,8 +19,8 @@ initial = model.default_state
 tspan = np.array([0.0, 3000.0])
 t_plot = np.linspace(tspan[0], tspan[1], 200)
 seed = np.random.randint(2**18)
-trajectory = mjpi.simulate(initial, model, tspan, seed)
-states_plot = discretize_trajectory(trajectory, t_plot)
+trajectory = mjpi.simulate_full(model, initial, tspan, seed)
+states_plot = mjpi.discretize_trajectory(trajectory, t_plot)
 
 # plot
 plt.plot(t_plot, states_plot, '--r')

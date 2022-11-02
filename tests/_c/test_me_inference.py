@@ -35,6 +35,7 @@ t_eval = np.linspace(tspan[0], tspan[1], 100)
 
 
 # set up inference engine
+rates = model.rate_array
 me = mjpi.MEInference(model)
 
 # make initial dist
@@ -44,9 +45,9 @@ initial_dist[ind] = 1.0
 
 param_generators = me.param_generators
 generator1 = me.generator
-generator2 = param_generators[0]
+generator2 = rates[0] * param_generators[0]
 for i in range(1, len(param_generators)):
-    generator2 += param_generators[i]
+    generator2 += rates[i] * param_generators[i]
 check = sla.norm(generator1-generator2)
 print("param gerator check", check)
 

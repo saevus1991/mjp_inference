@@ -39,7 +39,7 @@ inline np_array vec2array(vec& x) {
 template <class T>
 inline np_array vec2array(T&& x) {
     int x_size = x.rows();
-    double* x_ptr = x.data();
+    const double* x_ptr = x.data();
     np_array y(x_size);
     double *y_ptr = (double*) y.data();
     for (int i = 0; i < x_size; i++) {

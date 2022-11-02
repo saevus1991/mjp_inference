@@ -1,45 +1,80 @@
 #include "simulate.h"
 
-np_array simulate(np_array_c initial_in, MJP* transition_model, ObservationModel* obs_model, np_array_c t_eval_in, int seed, int max_events, std::string max_event_handler) {
-    // parse input
-    Eigen::Map<vec> initial((double*) initial_in.data(), initial_in.size());
-    Eigen::Map<vec> t_eval((double*) t_eval_in.data(), t_eval_in.size());
+
+mat_rm simulate(MJP* transition_model, ObservationModel* obs_model, const Eigen::Map<vec>& initial, const Eigen::Map<vec>& rates, const Eigen::Map<vec>& obs_param, const Eigen::Map<vec>& t_eval, int seed, int max_events, std::string max_event_handler) {
     // simulate states
     vec tspan = t_eval(std::vector<int>{0, int(t_eval.rows())-1});
-    Simulator simulator(transition_model, initial, tspan, seed, max_events, max_event_handler);
+    Simulator simulator(transition_model, initial, rates, tspan, seed, max_events, max_event_handler);
     mat_rm states = simulator.simulate(t_eval);
     // create observations
     if (obs_model != nullptr) {
         // preparations
-        int num_steps = t_eval_in.size();
+        unsigned num_steps = t_eval.size();
+        unsigned obs_dim = obs_model->get_obs_dim();
         std::mt19937& rng = simulator.get_rng();
-        vec obs_param = obs_model->get_param_array(); // #TODO: make simulate store pointer to rng
-        // sample first state
-        vec state_i = states.row(0).transpose();
-        vec first_obs = obs_model->sample(t_eval[0], state_i, obs_param, &rng);
+        vec obs_param_ = obs_param; // #TODO: use const double in obs->sample, then this extra step can be removed
         // create output
-        np_array obs_out(std::vector<int>({num_steps, int(first_obs.size())}));
-        Eigen::Map<mat_rm> obs((double*) obs_out.data(), num_steps, first_obs.size());
-        obs.row(0).noalias() = first_obs.transpose();
-        for (int i = 1; i < num_steps; i++) {
-            state_i.noalias() = states.row(i).transpose();
-            obs.row(i).noalias() = obs_model->sample(t_eval[i], state_i, obs_param, &rng);
+        mat_rm obs(num_steps, obs_dim);
+        for (unsigned i = 0; i < num_steps; i++) {
+            vec state_i = states.row(i).transpose();
+            obs.row(i).noalias() = obs_model->sample(t_eval[i], state_i, obs_param_, &rng);
         }
-        return(obs_out);
+        return(obs);
+    } else {
+        return(states);
     }
 }
 
-pybind11::dict simulate_full(np_array_c initial_in, MJP* transition_model, np_array_c tspan_, int seed, int max_events, std::string max_event_handler) {
+np_array simulate(MJP* transition_model, ObservationModel* obs_model, np_array_c initial_in, np_array_c rates_in, np_array_c obs_param_in,  np_array_c t_eval_in, int seed, int max_events, std::string max_event_handler) {
     // parse input
     Eigen::Map<vec> initial((double*) initial_in.data(), initial_in.size());
-    Eigen::Map<vec> tspan((double*)tspan_.data(), tspan_.size());
-    // simulate states
-    Simulator simulator(transition_model, initial, tspan, seed, max_events, max_event_handler);
-    return(simulator.simulate_py());
+    Eigen::Map<vec> rates((double*) rates_in.data(), rates_in.size());
+    Eigen::Map<vec> obs_param((double*) obs_param_in.data(), obs_param_in.size());
+    Eigen::Map<vec> t_eval((double*) t_eval_in.data(), t_eval_in.size());
+    // simulate
+    return(ut::mat2array(simulate(transition_model, obs_model, initial, rates, obs_param, t_eval, seed, max_events, max_event_handler)));
 }
 
+np_array simulate(MJP* transition_model, ObservationModel* obs_model, np_array_c initial_in, np_array_c t_eval_in, int seed, int max_events, std::string max_event_handler) {
+    // get defaults
+    np_array rates = transition_model->get_rate_array_np();
+    np_array obs_param = obs_model->get_param_array_np();
+    // simulate
+    return(simulate(transition_model, obs_model, initial_in, rates, obs_param, t_eval_in, seed, max_events, max_event_handler));
+}
 
-np_array simulate_batched(np_array_c initial_dist_in, np_array_c rates_in, MJP* transition_model, ObservationModel* obs_model, np_array_c obs_times_in, np_array_c obs_param_in, np_array_c tspan_in, int seed, int num_samples, int num_workers, int max_events, std::string max_event_handler) {
+np_array simulate(MJP* transition_model, np_array_c initial_in, np_array_c rates_in, np_array_c t_eval_in, int seed, int max_events, std::string max_event_handler) {
+    // get obs_model
+    ObservationModel* obs_model = nullptr;
+    np_array_c obs_param;
+    // simulate
+    return(simulate(transition_model, obs_model, initial_in, rates_in, obs_param, t_eval_in, seed, max_events, max_event_handler));
+}
+
+np_array simulate(MJP* transition_model, np_array_c initial_in, np_array_c t_eval_in, int seed, int max_events, std::string max_event_handler) {
+    // get rates
+    np_array rates = transition_model->get_rate_array_np();
+    // simulate
+    return(simulate(transition_model, initial_in, rates, t_eval_in, seed, max_events, max_event_handler));
+}
+
+pybind11::dict simulate_full(MJP* transition_model, np_array_c initial_, np_array_c rates_, np_array_c tspan_, int seed, int max_events, std::string max_event_handler) {
+    // parse input
+    Eigen::Map<vec> initial((double*) initial_.data(), initial_.size());
+    Eigen::Map<vec> rates((double*) rates_.data(), rates_.size());
+    Eigen::Map<vec> tspan((double*) tspan_.data(), tspan_.size());
+    // simulate
+    return(simulate_full(transition_model, initial, rates, tspan, seed, max_events, max_event_handler).to_dict());
+}
+
+pybind11::dict simulate_full(MJP* transition_model, np_array_c initial_, np_array_c tspan_, int seed, int max_events, std::string max_event_handler) {
+    // get rates
+    np_array rates = transition_model->get_rate_array_np();
+    // simulate
+    return(simulate_full(transition_model, initial_, rates, tspan_, seed, max_events, max_event_handler));
+}
+
+np_array simulate_batched(MJP* transition_model, ObservationModel* obs_model, np_array_c initial_dist_in, np_array_c rates_in, np_array_c obs_param_in, np_array_c obs_times_in, int seed, int num_samples, int num_workers, int max_events, std::string max_event_handler) {
     //set openmp 
     #ifdef _OPENMP
         int max_threads = omp_get_num_procs();
@@ -104,7 +139,7 @@ np_array simulate_batched(np_array_c initial_dist_in, np_array_c rates_in, MJP* 
     Eigen::Map<vec> rates((double*)rates_in.data(), rates_in.size());
     Eigen::Map<vec> obs_times((double*)obs_times_in.data(), obs_times_in.size());
     Eigen::Map<vec> obs_param((double*)obs_param_in.data(), obs_param_in.size());
-    Eigen::Map<vec> tspan((double*)tspan_in.data(), tspan_in.size());
+    vec tspan = obs_times(std::vector<int>{0, int(obs_times.rows())-1});
     int num_states = transition_model->get_num_states();
     int num_obs = obs_times.rows();
     int obs_dim = obs_model->get_obs_dim();
@@ -172,7 +207,7 @@ np_array simulate_batched(np_array_c initial_dist_in, np_array_c rates_in, MJP* 
 //     return(obs_out);
 // }
 
-pybind11::object simulate_posterior(np_array_c initial_dist_in, MJP* transition_model, ObservationModel* obs_model, np_array_c t_obs_in, np_array_c observations_in, np_array_c tspan_in, np_array_c t_grid_in, int seed, int num_samples, int max_events, std::string max_event_handler) {
+pybind11::object simulate_posterior(MJP* transition_model, ObservationModel* obs_model, np_array_c initial_dist_in, np_array_c t_obs_in, np_array_c observations_in, np_array_c tspan_in, np_array_c t_grid_in, int seed, int num_samples, int max_events, std::string max_event_handler) {
     // checks
     if (initial_dist_in.size() != transition_model->get_num_states()) {
         std::string msg = "Size of arguments initial_dist must match transition_model.get_num_states()";
@@ -216,7 +251,7 @@ pybind11::object simulate_posterior(np_array_c initial_dist_in, MJP* transition_
     }
 }
 
-pybind11::list simulate_posterior_batched(np_array_c initial_dist_in, np_array_c rates_in, MJP* transition_model, ObservationModel* obs_model, np_array_c obs_times_in, np_array_c observations_in,np_array_c obs_param_in, np_array_c tspan_in, np_array_c t_grid_in, int seed, int num_workers, int max_events, std::string max_event_handler) {
+pybind11::list simulate_posterior_batched(MJP* transition_model, ObservationModel* obs_model, np_array_c initial_dist_in, np_array_c rates_in, np_array_c obs_times_in, np_array_c observations_in,np_array_c obs_param_in, np_array_c tspan_in, np_array_c t_grid_in, int seed, int num_workers, int max_events, std::string max_event_handler) {
     //set openmp 
     #ifdef _OPENMP
         int max_threads = omp_get_num_procs();

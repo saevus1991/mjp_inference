@@ -103,7 +103,7 @@ obs_model.build()
 # create simulated data
 tspan = np.array([0.0, 100])
 seed = np.random.randint(2**18)
-trajectory = mjpi.simulate(initial, model, tspan, seed)
+trajectory = mjpi.simulate_full(model, initial, tspan, seed)
 
 # get a subsampling for plotting
 t_plot = np.linspace(tspan[0], tspan[1], 200)

@@ -30,6 +30,7 @@ __all__ = [
     "batched_filter_list",
     "simulate",
     "simulate_batched",
+    "simulate_full",
     "simulate_posterior"
 ]
 
@@ -135,7 +136,7 @@ class NoiseModel():
     def __init__(self, param_list: typing.List[Param]) -> None: ...
     def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
-    def sample(self, seed: int = 3213372214) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def sample(self, seed: int = 2213659372) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     @property
     def param_list(self) -> typing.List[str]:
         """
@@ -283,8 +284,9 @@ class MJP():
     pass
 class MEInference(MasterEquation):
     def __init__(self, model: MJP) -> None: ...
+    def augmented_forward(self, time: float, backward: numpy.ndarray[numpy.float64], forward: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
     @typing.overload
-    def forward(self, time: float, backward: numpy.ndarray[numpy.float64], forward: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
+    def forward(self, time: float, prob: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
     @typing.overload
     def forward(self, time: float, prob: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64]) -> numpy.ndarray[numpy.float64]: ...
     def update_generator(self, rates: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...
@@ -341,9 +343,9 @@ class ObservationModel():
         :type: int
         """
     @property
-    def param_array(self) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]:
+    def param_array(self) -> numpy.ndarray[numpy.float64]:
         """
-        :type: numpy.ndarray[numpy.float64, _Shape[m, 1]]
+        :type: numpy.ndarray[numpy.float64]
         """
     @property
     def param_list(self) -> typing.List[str]:
@@ -469,16 +471,28 @@ def batched_filter(initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndar
 def batched_filter_list(initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MEInference, observation_model: ObservationModel, obs_times: list, observations: list, obs_param: numpy.ndarray[numpy.float64], get_gradient: bool = False, num_workers: int = -1, backend: str = 'krylov') -> tuple:
     pass
 @typing.overload
-def simulate(initial_state: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_eval: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
+def simulate(transition_model: MJP, initial_state: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], t_eval: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
     pass
 @typing.overload
-def simulate(initial_state: numpy.ndarray[numpy.float64], transition_model: MJP, tspan: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> dict:
-    pass
-def simulate_batched(initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_obs: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], seed: int, num_samples: int = -1, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
+def simulate(transition_model: MJP, initial_state: numpy.ndarray[numpy.float64], t_eval: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
     pass
 @typing.overload
-def simulate_posterior(initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> list:
+def simulate(transition_model: MJP, obs_model: ObservationModel, initial_state: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_eval: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
     pass
 @typing.overload
-def simulate_posterior(initial_dist: numpy.ndarray[numpy.float64], transition_model: MJP, obs_model: ObservationModel, t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_samples: int = 1, max_events: int = 100000, max_event_handler: str = 'warning') -> object:
+def simulate(transition_model: MJP, obs_model: ObservationModel, initial_state: numpy.ndarray[numpy.float64], t_eval: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
+    pass
+def simulate_batched(transition_model: MJP, obs_model: ObservationModel, initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_obs: numpy.ndarray[numpy.float64], seed: int, num_samples: int = -1, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> numpy.ndarray[numpy.float64]:
+    pass
+@typing.overload
+def simulate_full(transition_model: MJP, initial_state: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], tspan: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> dict:
+    pass
+@typing.overload
+def simulate_full(transition_model: MJP, initial_state: numpy.ndarray[numpy.float64], tspan: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> dict:
+    pass
+@typing.overload
+def simulate_posterior(transition_model: MJP, obs_model: ObservationModel, initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> list:
+    pass
+@typing.overload
+def simulate_posterior(transition_model: MJP, obs_model: ObservationModel, initial_dist: numpy.ndarray[numpy.float64], t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_samples: int = 1, max_events: int = 100000, max_event_handler: str = 'warning') -> object:
     pass

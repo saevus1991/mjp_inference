@@ -4,6 +4,7 @@ from numba import cfunc, types
 from scipy import LowLevelCallable
 
 np.random.seed(2210281351)
+# TODO: fix this, e.g. use transforms from test_obs_model.py
 
 # prepare
 time = 10.0

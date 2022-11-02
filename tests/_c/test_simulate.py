@@ -101,7 +101,7 @@ tspan = np.array([0.0, 200.0])
 t_obs = np.arange(tspan[0], tspan[1], 3.0)
 
 # simulate
-obs = mjpi.simulate(initial, model, obs_model, t_obs, seed)
+obs = mjpi.simulate(model, obs_model, initial, t_obs, seed)
 
 # plot
 fig, axs = plt.subplots(1, 1)
