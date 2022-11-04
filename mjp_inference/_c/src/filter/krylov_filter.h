@@ -16,11 +16,11 @@ class KrylovFilter {
     KrylovFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, const vec& obs_times_in, const mat_rm& observations_in, const vec& initial_in, const vec& rates_in, const vec& obs_param_in);
 
     // main functions 
-    double log_prob();
-    void log_prob_backward();
-    void compute_rates_grad();
+    virtual double log_prob();
+    virtual void log_prob_backward();
+    virtual void compute_rates_grad();
 
-    // // getters
+    // getters
     inline vec get_initial_grad() {
         return(initial_grad);
     }
@@ -31,7 +31,7 @@ class KrylovFilter {
         return(obs_param_grad);
     }
 
-    private:
+    protected:
     int num_steps;
     MEInference* master_equation;
     MJP* transition_model;

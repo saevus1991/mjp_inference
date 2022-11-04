@@ -107,7 +107,18 @@ pybind11::tuple batched_filter(np_array_c initial_in, np_array_c rates_in, MEInf
         // choose backend
         if (backend == "krylov") {
             // compute likelihood
-            KrylovFilter filt = KrylovFilter(master_equation, obs_model, obs_times, get_obs(observations, i), get_initial(initial, i), get_rates(rates, i), get_obs_param(obs_param, i));
+            KrylovFilter filt(master_equation, obs_model, obs_times, get_obs(observations, i), get_initial(initial, i), get_rates(rates, i), get_obs_param(obs_param, i));
+            res[i] = filt.log_prob();
+            if (get_gradient) {
+                filt.log_prob_backward();
+                filt.compute_rates_grad();
+                initial_grad.segment(i*num_states, num_states) = filt.get_initial_grad();
+                rates_grad.segment(i*num_rates, num_rates) = filt.get_rates_grad();
+                obs_param_grad.segment(i*num_obs_param, num_obs_param) = filt.get_obs_param_grad();
+            }
+        } else if (backend == "krylov_mem") { // #TODO: unify this by pointer use
+            // compute likelihood
+            KrylovFilterMem filt(master_equation, obs_model, obs_times, get_obs(observations, i), get_initial(initial, i), get_rates(rates, i), get_obs_param(obs_param, i));
             res[i] = filt.log_prob();
             if (get_gradient) {
                 filt.log_prob_backward();

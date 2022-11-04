@@ -105,7 +105,7 @@ class MarkovTransitionKrylov(torch.autograd.Function):
 def markov_transition(initial: torch.Tensor, rates: torch.Tensor, tspan: torch.Tensor, master_equation: mjpi.MEInference, method: str='krylov') -> torch.Tensor:
     if method == 'ode':
         return(MarkovTransitionODE.apply(initial, rates, tspan, master_equation))
-    elif method == 'krylov':
+    elif method in ['krylov', 'krylov_mem']:
         return(MarkovTransitionKrylov.apply(initial, rates, tspan, master_equation))
     else:
         raise ValueError(f'Uknown backend {method}')

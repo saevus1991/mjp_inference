@@ -1,38 +1,23 @@
-#include "krylov_filter.h"
+#include "krylov_filter_mem.h"
 
+// consructor
 
-// constructor
-KrylovFilter::KrylovFilter(MEInference* master_equation_in, ObservationModel* obs_model_in, const vec& obs_times_in, const mat_rm& observations_in, const vec& initial_in, const vec& rates_in, const vec& obs_param_in) :
-  num_steps(obs_times_in.size()),
-  // sub_steps(100),
-  master_equation(master_equation_in),
-  transition_model(master_equation->get_model()),
-  obs_model(obs_model_in),
-  obs_times(obs_times_in),
-  observations(observations_in),
-  initial(initial_in),
-  rates(rates_in),
-  obs_param(obs_param_in),
-  states(num_steps),
-  indices(num_steps),
-  llh_stored(num_steps),
-  norm(num_steps),
-  rates_grad(transition_model->get_num_rates()),
-  obs_param_grad(obs_model->get_num_param())
-{ }
-
+KrylovFilterMem::KrylovFilterMem(MEInference* master_equation_in, ObservationModel* obs_model_in, const vec& obs_times_in, const mat_rm& observations_in, const vec& initial_in, const vec& rates_in, const vec& obs_param_in) :
+    KrylovFilter(master_equation_in, obs_model_in, obs_times_in, observations_in, initial_in, rates_in, obs_param_in),
+    states_post(num_steps)
+    {}
 
 // main functions
 
-double KrylovFilter::log_prob() {
+double KrylovFilterMem::log_prob() {
   // preparations
   vec state(initial);
   double time = 0.0;
   // iteraet over observations
   for (int i = 0; i < num_steps; i++) {
     // propagate
-    propagators.push_back(KrylovPropagator(master_equation, state, rates, obs_times[i]-time));
-    state.noalias() = propagators[i].propagate();
+    KrylovPropagator propagator(master_equation, state, rates, obs_times[i]-time);
+    state.noalias() = propagator.propagate();
     indices[i] = ut::math::nn_project(state);
     states[i] = state;
     // compute obs update
@@ -44,16 +29,18 @@ double KrylovFilter::log_prob() {
     double norm_tmp = state.sum();
     state = state / norm_tmp;
     norm[i] = max_state + std::log(norm_tmp);
+    states_post[i] = state;
     // update time
     time = obs_times[i];
   }
   return(norm.sum());
 }
 
-void KrylovFilter::log_prob_backward() {
+void KrylovFilterMem::log_prob_backward() {
   // preparations
   double time;
   vec backward;
+  rates_grad.setZero();
   obs_param_grad.setZero();
   for (int i = num_steps-1; i >= 0; i--) {
     // observation update
@@ -71,22 +58,28 @@ void KrylovFilter::log_prob_backward() {
     }
     // thresholding 
     backward(indices[i]).setZero();
+    // recompute forward
+    double delta_t;
+    vec state;
+    if (i >= 1) {
+        delta_t = obs_times[i]-obs_times[i-1];
+        state = states_post[i-1];
+    } else {
+        delta_t = obs_times[0];
+        state = initial;
+    }
+    KrylovPropagator propagator(master_equation, state, rates, delta_t);
+    propagator.propagate();
     // solve backward
-    propagators[i].backward(backward);
-    backward.noalias() = propagators[i].get_initial_grad();
+    propagator.backward(backward);
+    backward.noalias() = propagator.get_initial_grad();
+    // compute rates gradient
+    propagator.compute_rates_grad();
+    rates_grad.noalias() += propagator.get_rates_grad();
   }
   initial_grad = backward;
 }
 
-void KrylovFilter::compute_rates_grad() {
-  // preparations
-  rates_grad.setZero();
-  // iterate over obs intervals
-  for (int i = 0; i < num_steps; i++) {
-    // compute rates gradient of local propagator
-    propagators[i].compute_rates_grad();
-    // accumulate
-    rates_grad.noalias() += propagators[i].get_rates_grad();
-  }
+void KrylovFilterMem::compute_rates_grad() {
   return;
 }

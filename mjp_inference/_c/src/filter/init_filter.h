@@ -1,5 +1,6 @@
 #pragma once
 #include "krylov_filter.h"
+#include "krylov_filter_mem.h"
 #include "krylov_backward_filter.h"
 #include "batched_filter.h"
 

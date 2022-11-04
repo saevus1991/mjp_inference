@@ -355,7 +355,7 @@ def filter(initial_dist: torch.Tensor, rates: torch.Tensor, master_equation: mjp
     if isinstance(obs_times, list) and initial_map is None:
         return(FilterKrylovList.apply(initial_dist, rates, master_equation, obs_model, obs_times, observations, obs_param, mode, num_workers))
     elif isinstance(obs_times, torch.Tensor):
-        if mode == 'krylov':
+        if mode in ['krylov', 'krylov_mem']:
             return(FilterKrylov.apply(initial_dist, rates, master_equation, obs_model, obs_times, observations, obs_param, mode, num_workers))
         if mode == 'ODE':
             if num_workers == 1:
