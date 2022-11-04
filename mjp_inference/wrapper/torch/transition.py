@@ -69,8 +69,9 @@ class MarkovTransitionKrylov(torch.autograd.Function):
     """
 
     @staticmethod
-    def forward(ctx, initial: torch.Tensor, rates: torch.Tensor, time: torch.Tensor, master_equation: mjpi.MEInference):
+    def forward(ctx, initial: torch.Tensor, rates: torch.Tensor, tspan: torch.Tensor, master_equation: mjpi.MEInference):
         # set up compiled propagator
+        time = tspan[1]-tspan[0]
         propagator = mjpi.KrylovPropagator(master_equation, initial.detach().numpy(), rates.detach().numpy(), time.item())
         terminal = propagator.propagate()
         if initial.requires_grad or rates.requires_grad or time.requires_grad:
@@ -96,7 +97,7 @@ class MarkovTransitionKrylov(torch.autograd.Function):
             propagator.compute_rates_grad()
             rates_grad = torch.from_numpy(propagator.get_rates_grad())
         if time.requires_grad:
-            time_grad = torch.tensor(propagator.get_time_grad()).reshape(time.shape)
+            time_grad = torch.tensor(propagator.get_time_grad()) * torch.tensor([-1, 1])
         return(initial_grad, rates_grad, time_grad, transition_model_grad)
 
 
