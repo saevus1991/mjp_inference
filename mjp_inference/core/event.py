@@ -18,16 +18,20 @@ class Event(_Event):
 
     def __init__(self, name: str, input_species: list=None, output_species: list=None, rate=None, propensity: Callable=None, change_vec: list[int]=None):
         # parse rate
+        rate = self.parse_rate(name, rate)
+        # parse hazard 
+        propensity_callable = parse_function(propensity, ArrayFun)   
+        # call Event constructor
+        _Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, propensity_callable=propensity_callable, change_vec=change_vec)
+
+    def parse_rate(self, name, rate):
         if rate is None:
             rate = Rate(name, 1.0)
         elif isinstance(rate, float):
             rate = Rate(name, rate)
         elif isinstance(rate, str):
             rate = Rate(rate, 1.0)
-        # parse hazard 
-        propensity_callable = parse_function(propensity, ArrayFun)   
-        # call Event constructor
-        _Event.__init__(self, name, input_species=input_species, output_species=output_species, rate=rate, propensity_callable=propensity_callable, change_vec=change_vec)
+        return(rate)
 
 
 class Reaction(Event):
@@ -102,7 +106,7 @@ class MassAction(Reaction):
         return(mass_action)
 
 
-class Transition(_Event):
+class Transition(Event):
 
     def __init__(self, name: str, species: list[str], state: list[int], target: list[int], rate: float=None):
         input_species = species
@@ -121,7 +125,7 @@ class Transition(_Event):
                     equal = False
                     break
             if equal:
-                return(rate)
+                return(1.0)
             else:
                 return(0.0)
         return(propensity)

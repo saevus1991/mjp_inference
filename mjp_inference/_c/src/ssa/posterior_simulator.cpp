@@ -87,7 +87,9 @@ Trajectory PosteriorSimulator::simulate(S& t_grid, T& backward) {
 
 template Trajectory PosteriorSimulator::simulate<vec, mat_rm>(vec& t_grid, mat_rm& backward);
 template Trajectory PosteriorSimulator::simulate<Eigen::Map<vec>, Eigen::Map<mat_rm>>(Eigen::Map<vec>& t_grid, Eigen::Map<mat_rm>& backward);
+template Trajectory PosteriorSimulator::simulate<const Eigen::Map<vec>, const Eigen::Map<mat_rm>>(const Eigen::Map<vec>& t_grid, const Eigen::Map<mat_rm>& backward);
 template Trajectory PosteriorSimulator::simulate<Eigen::Map<vec>, mat_rm>(Eigen::Map<vec>& t_grid, mat_rm& backward);
+template Trajectory PosteriorSimulator::simulate<const Eigen::Map<vec>, const mat_rm>(const Eigen::Map<vec>& t_grid, const mat_rm& backward);
 
 pybind11::dict PosteriorSimulator::simulate(np_array_c t_grid_in, np_array_c backward_in) {
     // parse iput

@@ -20,7 +20,7 @@ ObservationModel::~ObservationModel() {
 // helpers
 
 NoiseModel* ObservationModel::build_noise_model() {
-    NoiseModel* noise_model;
+    NoiseModel* noise_model; // #TODO: use unique pointer
     if (noise_type == "normal") {
         noise_model = new Normal();
     } else if (noise_type == "lognormal") {

@@ -274,7 +274,7 @@ np_array MJP::ind2state_np(unsigned ind) {
     return(ut::vec2array(state));
 }
 
-unsigned MJP::state2ind(const vec& state_) { // #TODO: can be templated
+unsigned MJP::state2ind(const vec& state_) { 
     std::vector<double> state((double*)state_.data(), (double*)state_.data() + state_.size());
     return(ut::state2lin(state, dims));
 }

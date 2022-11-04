@@ -159,7 +159,9 @@ mat_rm KrylovBackwardFilter::eval_backward_filter(T& time) {
 }
 
 template mat_rm KrylovBackwardFilter::eval_backward_filter<vec>(vec& time);
+template mat_rm KrylovBackwardFilter::eval_backward_filter<const vec>(const vec& time);
 template mat_rm KrylovBackwardFilter::eval_backward_filter<Eigen::Map<vec>>(Eigen::Map<vec>& time);
+template mat_rm KrylovBackwardFilter::eval_backward_filter<const Eigen::Map<vec>>(const Eigen::Map<vec>& time);
 
 vec KrylovBackwardFilter::eval_smoothed(double time) {
   // find interval

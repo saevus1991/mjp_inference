@@ -14,7 +14,7 @@ from mjp_inference._c.mjp_inference import MEInference
 # import time
 # from pymbvi.forward_backward import ForwardBackward, FilterObsModel
 
-# # np.random.seed(2106301102)
+np.random.seed(2106301102)
 # torch.set_default_tensor_type(torch.DoubleTensor)
 
 # set up model
@@ -124,29 +124,7 @@ initial_dist[ind] = 1.0
 master_equation = mjpi.MEInference(model)
 rates = model.rate_array
 initial_dist = solve_ivp(master_equation.forward, np.array([0.0, 1000.0]), initial_dist)['y'][:, -1]
-print("test")
-# # # filter obs model
-# filter_obs = FilterObsModel(model, obs_model, t_obs, observations)
 
-# # # set up filter
-# fb_engine = ForwardBackward(initial_dist, model, filter_obs, t_obs, observations, subsample=100, tspan=tspan)
-
-# # run filter
-# fb_engine.forward_update()
-# fb_engine.backward_update()
-
-# # # extract data for plotting
-# # t_filt = fb_engine.get_time()
-# # p_filt = fb_engine.get_forward()
-# # backward = fb_engine.get_backward()
-# # t_smooth = t_filt
-# # p_smooth = fb_engine.get_smoothed()
-
-# # # extract data for plotting
-# # t_filt = fb_engine.get_time()
-# # p_filt = fb_engine.get_forward()
-# t_smooth = fb_engine.get_time()
-# p_smooth = fb_engine.get_smoothed()
 
 # compute summary stats
 state_map = model.build_state_map()
@@ -164,6 +142,9 @@ for i, state in enumerate(states_plot):
 # # intensity_filt = obs_model.intensity(states_filt, t_filt, obs_param)
 # intensity_smooth = obs_model.intensity(states_smooth, t_smooth, obs_param)
 
+# set up master equation
+master_equation = mjpi.MEInference(model)
+
 # simulate posterior trajectories
 num_samples = 10
 t_post = np.linspace(tspan[0], tspan[1], 100*len(t_obs))
@@ -172,7 +153,7 @@ pol_post = np.zeros((num_samples, len(t_post)))
 stem_post = np.zeros((num_samples, len(t_post)))
 intensity_post = np.zeros((num_samples, len(t_post)))
 seed = np.random.randint(2**16)
-trajectories = mjpi.simulate_posterior(model, obs_model, initial_dist, t_obs, observations, tspan, t_post, seed, num_samples=num_samples)
+trajectories = mjpi.simulate_posterior_batched(master_equation, obs_model, initial_dist, rates, obs_param, tspan, t_obs, observations, t_post, seed, num_samples=10)
 for i, trajectory in enumerate(trajectories):
     states_post[i] = mjpi.discretize_trajectory(trajectory, t_post)
     pol_post[i] = states_post[i, :, :].sum(axis=1)

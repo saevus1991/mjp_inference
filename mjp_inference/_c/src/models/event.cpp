@@ -9,7 +9,7 @@ Event::Event(std::string name_, std::vector<std::string> input_species_, std::ve
     rate(rate_),
     propensity_callable(propensity_callable_),
     propensity_capsule(propensity_callable[0]),
-    propensity_fun(reinterpret_cast<double (*)(double*)>(propensity_capsule.get_pointer())),
+    propensity_fun(reinterpret_cast<ArrayFun>(propensity_capsule.get_pointer())),
     change_vec(change_vec_),
     species_list(ut::extract_dict_keys<std::string>(species_dict_)),
     species_map(ut::extract_dict_values<Species*>(species_dict_))
@@ -26,7 +26,7 @@ Event::Event(std::string name_, std::vector<std::string> input_species_, std::ve
     rate(rate_),
     propensity_callable(propensity_callable_),
     propensity_capsule(propensity_callable[0]),
-    propensity_fun(reinterpret_cast<double (*)(double*)>(propensity_capsule.get_pointer())), 
+    propensity_fun(reinterpret_cast<ArrayFun>(propensity_capsule.get_pointer())), 
     change_vec(change_vec_), 
     species_list(build_species_list(species_map_)),
     species_map(species_map_)

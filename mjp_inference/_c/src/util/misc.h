@@ -129,4 +129,5 @@ std::vector<Eigen::Map<vec>> map_array(np_array_c array, int batch_size, int bas
 std::vector<Eigen::Map<vec>> map_array(np_array_c array, np_array_c map, int base_dim);
 std::vector<Eigen::Map<vec>> parse_array_list(pybind11::list arrays, int batch_size);
 
+
 } // end namespace

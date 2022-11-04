@@ -19,7 +19,7 @@ class ObservationModel {
     void build();
 
     // helper functions
-    inline std::vector<vec> compute_noise_params(double time, vec& state, vec& param) {
+    inline std::vector<vec> compute_noise_params(double time, const vec& state, const vec& param) const {
         std::vector<vec> noise_params(transform_map.size());
         for (unsigned i = 0; i < transform_map.size(); i++) {
             noise_params[i] = transform_map[i].transform(time, state, param);
@@ -42,7 +42,7 @@ class ObservationModel {
     inline void add_transform(Transform transform) {
         transform_map.push_back(transform);
     }
-    inline unsigned transform_index(const std::string& transform) {
+    inline unsigned transform_index(const std::string& transform) const {
         auto it = std::find(noise_param_list.begin(), noise_param_list.end(), transform);
         unsigned index = it - noise_param_list.begin();
         if (index == noise_param_list.size()) {
@@ -74,20 +74,20 @@ class ObservationModel {
     inline unsigned get_num_param() const {
         return(num_param);
     }
-    inline unsigned get_obs_dim() {
+    inline unsigned get_obs_dim() const {
         return(obs_dim);
     }
     std::string get_param_parser() const;
 
     // main functions
-    inline double log_prob(double time, vec& state, vec& param, vec& obs) {
+    inline double log_prob(double time, const vec& state, const vec& param, const vec& obs) {
         // compute noise params
         std::vector<vec> noise_params = compute_noise_params(time, state, param);
         // evaluate llh
         double llh = noise_model->log_prob(noise_params, obs);
         return(llh);
     }
-    inline vec log_prob_grad(double time, vec& state, vec& param, vec& obs) {
+    inline vec log_prob_grad(double time, const vec& state, const vec& param, const vec& obs) {
         // gradients of the noise model
         std::vector<vec> noise_params = compute_noise_params(time, state, param);
         std::vector<vec> noise_grad = noise_model->log_prob_grad(noise_params, obs);
@@ -99,39 +99,39 @@ class ObservationModel {
         }
         return(grad);
     }
-    inline vec sample(double time, vec& state, vec&param, std::mt19937* rng) {
+    inline vec sample(double time, const vec& state, const vec&param, std::mt19937* rng) {
         // compute noise params
         std::vector<vec> noise_params = compute_noise_params(time, state, param);
         // sample from the noise model
         vec obs = noise_model->sample(noise_params, rng);
         return(obs);
     }
-    inline vec sample_np(double time, vec& state, vec&param, unsigned seed) {
+    inline vec sample_np(double time, const vec& state, const vec& param, unsigned seed) {
         std::mt19937 rng(seed);
         return(sample(time, state, param, &rng));
     }
-    inline vec transform(double time, vec&state, vec&param, const std::string name) {
+    inline vec transform(double time, const vec&state, const vec&param, const std::string& name) {
         unsigned ind = transform_index(name);
         return(transform_map[ind].transform(time, state, param));
     }
     // vectorized main functions
-    inline vec log_prob_vec(double time, vec& param, vec& obs) {
+    inline vec log_prob_vec(double time, const vec& param, const vec& obs) {
         // iterate over states
         vec llh(num_states);
         for (int i = 0; i < num_states; i++) {
             llh[i] = log_prob(time, state_map[i], param, obs);
         }
         return(llh);
-    } // #TODO: mat -> mat_rm?
-    inline mat log_prob_grad_vec(double time, vec& param, vec& obs) {
+    } 
+    inline mat_rm log_prob_grad_vec(double time, const vec& param, const vec& obs) {
         // iterate over states
-        mat llh_grad(num_states, param.size());
+        mat_rm llh_grad(num_states, param.size());
         for (int i = 0; i < num_states; i++) {
             llh_grad.row(i).noalias() = log_prob_grad(time, state_map[i], param, obs).transpose();
         }
         return(llh_grad);
     }
-    inline mat_rm transform_vec(double time, vec&param, const std::string name) {
+    inline mat_rm transform_vec(double time, const vec&param, const std::string& name) {
         unsigned ind = transform_index(name);
         unsigned dim = transform_map[ind].get_output_dim();
         mat_rm transformed(num_states, dim);
@@ -153,19 +153,6 @@ class ObservationModel {
     vec param_array;
     unsigned num_states;
     unsigned obs_dim;
-    // std::vector<std::string> rv_list;
-    // std::vector<RVSampler> rv_map;
-    // pybind11::tuple transformation_callable; 
-    // pybind11::capsule transformation_capsule;
-    // Transformation transformation_fun; 
-    // pybind11::tuple sample_callable;
-    // pybind11::capsule sample_capsule;
-    // Sampler sample_fun;
-    // pybind11::tuple llh_callable;
-    // pybind11::capsule llh_capsule;
-    // Llh llh_fun;
-    // unsigned transform_dim;
-    // unsigned obs_dim;
     std::vector<vec> state_map;
 
 };

@@ -223,8 +223,6 @@ std::tuple<bool, double, int> Simulator::next_reaction(double time, vec& hazard)
 }
 
 // #TODO: add a post simulation discretization
-// #TODO: add parallel simulator
-// #TODO: add posterior simulator
 
 // *** wrapper class *** 
 

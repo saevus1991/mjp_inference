@@ -31,7 +31,8 @@ __all__ = [
     "simulate",
     "simulate_batched",
     "simulate_full",
-    "simulate_posterior"
+    "simulate_posterior",
+    "simulate_posterior_batched"
 ]
 
 
@@ -136,7 +137,7 @@ class NoiseModel():
     def __init__(self, param_list: typing.List[Param]) -> None: ...
     def log_prob(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> float: ...
     def log_prob_grad(self, obs: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> typing.List[numpy.ndarray[numpy.float64, _Shape[m, 1]]]: ...
-    def sample(self, seed: int = 510582480) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
+    def sample(self, seed: int = 6286174) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     @property
     def param_list(self) -> typing.List[str]:
         """
@@ -490,9 +491,7 @@ def simulate_full(transition_model: MJP, initial_state: numpy.ndarray[numpy.floa
 @typing.overload
 def simulate_full(transition_model: MJP, initial_state: numpy.ndarray[numpy.float64], tspan: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> dict:
     pass
-@typing.overload
-def simulate_posterior(transition_model: MJP, obs_model: ObservationModel, initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> list:
+def simulate_posterior(master_equation: MEInference, obs_model: ObservationModel, initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], tspan: numpy.ndarray[numpy.float64], t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, max_events: int = 100000, max_event_handler: str = 'warning') -> dict:
     pass
-@typing.overload
-def simulate_posterior(transition_model: MJP, obs_model: ObservationModel, initial_dist: numpy.ndarray[numpy.float64], t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], t_span: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_samples: int = 1, max_events: int = 100000, max_event_handler: str = 'warning') -> object:
+def simulate_posterior_batched(master_equation: MEInference, obs_model: ObservationModel, initial_dist: numpy.ndarray[numpy.float64], rates: numpy.ndarray[numpy.float64], obs_param: numpy.ndarray[numpy.float64], tspan: numpy.ndarray[numpy.float64], t_obs: numpy.ndarray[numpy.float64], observations: numpy.ndarray[numpy.float64], t_grid: numpy.ndarray[numpy.float64], seed: int, num_samples: int = -1, num_workers: int = -1, max_events: int = 100000, max_event_handler: str = 'warning') -> list:
     pass
