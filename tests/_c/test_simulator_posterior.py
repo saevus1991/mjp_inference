@@ -159,7 +159,7 @@ for i, trajectory in enumerate(trajectories):
     pol_post[i] = states_post[i, :, :].sum(axis=1)
     stem_post[i] = states_post[i]@alpha
     for j in range(len(t_post)):
-        intensity_post[i, j] = obs_model.transform(t_post[j], states_post[i][j], obs_param, 'mu')
+        intensity_post[i, j] = obs_model.transform(t_post[j], states_post[i][j], obs_param.squeeze(), 'mu')
 
 # sampled posterior means
 # states_post_mean = np.mean(states_smooth, axis=0)

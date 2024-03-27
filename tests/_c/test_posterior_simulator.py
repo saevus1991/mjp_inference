@@ -128,6 +128,7 @@ t_post = np.linspace(tspan[0], tspan[1], 100*len(t_obs))
 obs_param = obs_model.param_array
 filt = mjpi.KrylovBackwardFilter(master_equation, obs_model, t_obs, observations, initial_dist, rates, obs_param, tspan)
 filt.forward_filter()
+print("ran forward filter")
 filt.backward_filter()
 print(filt.log_prob())
 backward = filt.eval_backward_filter(t_post)
