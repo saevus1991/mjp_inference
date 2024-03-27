@@ -47,5 +47,6 @@ class Krylov {
     mat span;
     mat proj;
     bool degenerate;
+    bool finite;
 
 };

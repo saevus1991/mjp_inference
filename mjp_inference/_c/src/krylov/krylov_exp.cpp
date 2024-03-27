@@ -9,7 +9,8 @@ Krylov::Krylov(csr_mat generator_in, vec initial_in, int order_in) :
     dim(initial_in.rows()),
     generator_mat(generator_in),
     generator(Operator([this](vec& x) { return generator_mat*x ;})),
-    order(order_in)
+    order(order_in),
+    finite(false)
     {
         double check = initial_in.norm();
         if (check < 1e-16) {
@@ -30,7 +31,8 @@ Krylov::Krylov(Operator generator_in, vec initial_in, int order_in) :
     tol(1e-10),
     dim(initial_in.rows()),
     generator(generator_in),
-    order(order_in)
+    order(order_in),
+    finite(false)
     {
         double check = initial_in.norm();
         if (check < 1e-16) {
@@ -65,7 +67,18 @@ void Krylov::build() {
             v.noalias() = q;
         }
         proj(i+1, i) = v.norm();
-        q.noalias() = v / proj(i+1, i);
+        // terminate expansion if remaining component is small
+        if (proj(i+1, i) < 1e-12) { 
+            finite = true;
+            order = i+1;
+            mat new_span = span.block(0, 0, dim, order);
+            mat new_proj = proj.block(0, 0, order+1, order);
+            span = new_span;
+            proj = new_proj;
+            break;
+        } else {
+            q.noalias() = v / proj(i+1, i);
+        }
     }
     return;
 }
@@ -90,7 +103,18 @@ void Krylov::expand(int inc){
             v.noalias() = q;
         }
         new_proj(i+1, i) = v.norm();
-        q.noalias() = v / new_proj(i+1, i);
+        // terminate expansion if remaining component is small
+        if (new_proj(i+1, i) < 1e-12) {
+            finite = true;
+            new_order = i+1;
+            mat new_span_tmp = new_span.block(0, 0, dim, new_order);
+            mat new_proj_tmp = new_proj.block(0, 0, new_order+1, new_order); 
+            new_span = new_span_tmp;
+            new_proj = new_proj_tmp;
+            break;
+        } else {
+            q.noalias() = v / new_proj(i+1, i);
+        }
     }
     // update stored
     order = new_order;
@@ -110,15 +134,15 @@ vec Krylov::eval(double time) {
         return(output);
     }
     bool converged = false;
-    vec res;
-    while (!converged) {
+    vec res = eval_proj(time);
+    while (!finite && !converged) {
         // compute projected result and error
-        res = eval_proj(time);
         double err = res[order];
         if (std::abs(err) <= tol) {
             converged = true;
         } else{
             expand(5);
+            res.noalias() = eval_proj(time);
         }
     }
     vec output = scale * span * res.segment(0, order);
