@@ -210,6 +210,7 @@ pybind11::dict simulate_posterior(MEInference* master_equation, ObservationModel
 
 
 pybind11::list simulate_posterior_batched(MEInference* master_equation, ObservationModel* obs_model, np_array_c initial_dist_in, np_array_c rates_in, np_array_c obs_param_in,np_array_c tspan_in, np_array_c obs_times_in, np_array_c observations_in, np_array_c t_grid_in, int seed, int num_samples, int num_workers, int max_events, std::string max_event_handler) {
+    // #TODO: This failed with the poisson example -> check
     //set openmp 
     #ifdef _OPENMP
         int max_threads = omp_get_num_procs();
