@@ -7,6 +7,8 @@ from glob import glob
 from pathlib import Path
 import sys
 import platform
+import subprocess
+
 
 __version__ = "0.0.1"
 
@@ -96,9 +98,9 @@ for dirpath, subdirs, filenames in os.walk(build_dir):
 
 # create stubs
 output_folder = Path(__file__).parent.joinpath('tmp')
-args = [name, '-o', str(output_folder), '--no-setup-py']
-pybind11_stubgen.main(args)
-file_path = output_folder.joinpath(f'{name}-stubs', '__init__.pyi')
+command = ["pybind11-stubgen", f'{name}._c.{name}', '-o', str(output_folder)]
+subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+file_path = output_folder.joinpath(name, '_c', f'{name}.pyi')
 target_path = output_folder.parent.joinpath(f'{name}.pyi')
 if target_path.exists():
     target_path.unlink()

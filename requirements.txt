@@ -6,3 +6,5 @@ pybind11>=2.10.0
 pybind11-stubgen>=0.11.0
 torch>=1.12.1
 pyro-ppl>=1.8.2
+ipykernel>=6.28.0
+setuptools>=70.3.0
