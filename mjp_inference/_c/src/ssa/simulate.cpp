@@ -162,7 +162,7 @@ np_array simulate_batched(MJP* transition_model, ObservationModel* obs_model, np
 
 Trajectory simulate_posterior(MJP* transition_model, const Eigen::Map<vec>& initial, const Eigen::Map<vec>& rates, const Eigen::Map<vec>& tspan, const Eigen::Map<vec>& t_grid, const Eigen::Map<mat_rm>& backward_grid, std::mt19937* rng, int max_events, std::string max_event_handler) {
     // set up simulator
-    PosteriorSimulator simulator(transition_model, initial, tspan, rng, max_events, max_event_handler);
+    PosteriorSimulator simulator(transition_model, initial, rates, tspan, rng, max_events, max_event_handler);
     // simulate 
     return(simulator.simulate(t_grid, backward_grid));
 }
